@@ -8,6 +8,8 @@ export type NormalizedThread = {
   attachments: Array<{ name: string; mimeType?: string }>;
   courseHint?: string;
   isProfessorCommand: boolean;
+  inReplyTo?: string;
+  references?: string[];
 };
 
 export function normalizeThread(input: Partial<NormalizedThread>): NormalizedThread {
@@ -21,5 +23,7 @@ export function normalizeThread(input: Partial<NormalizedThread>): NormalizedThr
     attachments: input.attachments ?? [],
     courseHint: input.courseHint,
     isProfessorCommand: input.isProfessorCommand ?? false,
+    inReplyTo: input.inReplyTo,
+    references: input.references ?? [],
   };
 }

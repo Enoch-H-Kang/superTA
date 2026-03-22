@@ -12,7 +12,7 @@ export type ProcessInboundOptions = {
   classify?: (input: {
     thread: NormalizedThread;
     courseId?: string;
-  }) => Classification;
+  }) => Classification | Promise<Classification>;
 };
 
 export type ProcessInboundResult = {
@@ -47,7 +47,7 @@ export async function processInboundThread(
   const evidence = route.courseId ? await retrieveCourseFacts(courseRoot) : [];
 
   const classify = options.classify ?? fallbackClassifier;
-  const initialClassification = classify({ thread, courseId: route.courseId });
+  const initialClassification = await classify({ thread, courseId: route.courseId });
   const classification = applyPolicy(route, initialClassification, evidence);
 
   if (classification.action === 'escalate_now') {
@@ -104,6 +104,9 @@ export async function processInboundThread(
     threadId: thread.threadId,
     messageId: thread.messageId,
     courseId: route.courseId,
+    replyTo: [thread.from],
+    inReplyTo: thread.inReplyTo ?? thread.messageId,
+    references: thread.references ?? [thread.messageId],
     classification,
     evidence,
     draftSubject: `${drafted.subjectPrefix} ${thread.subject}`,

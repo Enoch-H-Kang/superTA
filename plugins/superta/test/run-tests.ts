@@ -1,4 +1,5 @@
 import { runConfigTests } from './config.test.js';
+import { runLoadConfigTests } from './load-config.test.js';
 import { runRoutingTests } from './routing.test.js';
 import { runClassificationContractTests } from './classify.test.js';
 import { runPolicyEngineTests } from './policy-engine.test.js';
@@ -10,11 +11,27 @@ import { runActionExecutorTests } from './action-executor.test.js';
 import { runGmailClientTests } from './gmail-client.test.js';
 import { runGmailExecutorTests } from './gmail-executor.test.js';
 import { runAuditLoggerTests } from './audit-logger.test.js';
+import { runFileStoreTests } from './file-store.test.js';
+import { runStubClassifierTests } from './stub-classifier.test.js';
+import { runValidateClassificationTests } from './validate-classification.test.js';
+import { runParseOpenAIResponsesOutputTests } from './parse-openai-responses-output.test.js';
+import { runResponsesAdapterTests } from './responses-adapter.test.js';
+import { runResponsesHttpClientTests } from './responses-http-client.test.js';
+import { runProposalTests } from './proposals.test.js';
+import { runProfessorCommandParserTests } from './parse-professor-command.test.js';
+import { runProcessProfessorCommandTests } from './process-professor-command.test.js';
+import { runExecuteProfessorCommandTests } from './execute-professor-command.test.js';
+import { runExecuteProfessorSendTests } from './execute-professor-send.test.js';
+import { runProposalReviewAndApplyTests } from './proposal-review-and-apply.test.js';
+import { runDeadlineWorkflowTests } from './deadline-workflow.test.js';
 import { runProcessInboundThreadTests } from './process-inbound-thread.test.js';
 import { runProcessWithConfigTests } from './process-with-config.test.js';
+import { runProcessAndStoreTests } from './process-and-store.test.js';
+import { runProcessWithClassifierTests } from './process-with-classifier.test.js';
 
 async function main() {
   runConfigTests();
+  await runLoadConfigTests();
   runRoutingTests();
   runClassificationContractTests();
   runPolicyEngineTests();
@@ -26,8 +43,23 @@ async function main() {
   await runGmailClientTests();
   await runGmailExecutorTests();
   runAuditLoggerTests();
+  await runFileStoreTests();
+  await runStubClassifierTests();
+  runValidateClassificationTests();
+  runParseOpenAIResponsesOutputTests();
+  await runResponsesAdapterTests();
+  await runResponsesHttpClientTests();
+  runProposalTests();
+  runProfessorCommandParserTests();
+  runProcessProfessorCommandTests();
+  await runExecuteProfessorCommandTests();
+  await runExecuteProfessorSendTests();
+  await runProposalReviewAndApplyTests();
+  await runDeadlineWorkflowTests();
   await runProcessInboundThreadTests();
   await runProcessWithConfigTests();
+  await runProcessAndStoreTests();
+  await runProcessWithClassifierTests();
   console.log('plugin tests passed');
 }
 

@@ -7,11 +7,16 @@ export async function runGmailClientTests() {
   const thread = await client.fetchThread('thread-123');
   assert.equal(thread.length, 1);
   assert.equal(thread[0]?.threadId, 'thread-123');
+  assert.equal(thread[0]?.inReplyTo, 'orig-message-id');
+  assert.deepEqual(thread[0]?.references, ['orig-message-id']);
 
   const draft = await client.createDraft({
     to: ['student@example.edu'],
     subject: 'Draft',
     body: 'Hello',
+    threadId: 'thread-123',
+    inReplyTo: 'orig-message-id',
+    references: ['orig-message-id'],
   });
   assert.equal(draft.status, 'drafted');
 
@@ -19,6 +24,9 @@ export async function runGmailClientTests() {
     to: ['student@example.edu'],
     subject: 'Sent',
     body: 'Hello',
+    threadId: 'thread-123',
+    inReplyTo: 'orig-message-id',
+    references: ['orig-message-id'],
   });
   assert.equal(sent.status, 'sent');
 

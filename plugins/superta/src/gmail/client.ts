@@ -5,17 +5,20 @@ export type GmailThreadMessage = {
   to: string[];
   subject: string;
   bodyText: string;
+  inReplyTo?: string;
+  references?: string[];
 };
 
 export type GmailDraftRequest = {
   to: string[];
   subject: string;
   body: string;
+  threadId?: string;
+  inReplyTo?: string;
+  references?: string[];
 };
 
-export type GmailSendRequest = GmailDraftRequest & {
-  threadId?: string;
-};
+export type GmailSendRequest = GmailDraftRequest;
 
 export type GmailForwardRequest = {
   threadId: string;
@@ -47,6 +50,8 @@ export function createMockGmailClient(): GmailClient {
           to: ['course@example.edu'],
           subject: 'Mock subject',
           bodyText: 'Mock body',
+          inReplyTo: 'orig-message-id',
+          references: ['orig-message-id'],
         },
       ];
     },

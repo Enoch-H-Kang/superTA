@@ -1,0 +1,28 @@
+{
+  "professorId": "prof-enoch",
+  "gmail": {
+    "webhookPath": "/webhooks/gmail",
+    "allowedProfessorSenders": ["prof@example.edu"]
+  },
+  "routing": {
+    "professorId": "prof-enoch",
+    "courses": [
+      {
+        "courseId": "cs101-sp26",
+        "termId": "sp26",
+        "aliases": ["cs101@school.edu"],
+        "subjectHints": ["cs101"]
+      },
+      {
+        "courseId": "econ201-sp26",
+        "termId": "sp26",
+        "aliases": ["econ201@school.edu"],
+        "subjectHints": ["econ201"]
+      }
+    ]
+  },
+  "courseRoots": {
+    "cs101-sp26": "/path/to/cs101-sp26",
+    "econ201-sp26": "/path/to/econ201-sp26"
+  }
+}

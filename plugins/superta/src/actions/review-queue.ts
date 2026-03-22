@@ -8,6 +8,9 @@ export type ReviewQueueItem = {
   threadId: string;
   messageId: string;
   courseId?: string;
+  replyTo: string[];
+  inReplyTo?: string;
+  references: string[];
   classification: Classification;
   evidence: EvidenceItem[];
   draftSubject: string;

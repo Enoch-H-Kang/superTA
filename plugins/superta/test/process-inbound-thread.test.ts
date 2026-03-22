@@ -35,6 +35,8 @@ function thread(overrides: Partial<NormalizedThread> = {}): NormalizedThread {
     bodyText: 'Can I submit late?',
     attachments: [],
     isProfessorCommand: false,
+    inReplyTo: 'orig-message-id',
+    references: ['orig-message-id'],
     ...overrides,
   };
 }
@@ -85,13 +87,16 @@ export async function runProcessInboundThreadTests() {
     if (queued.outcome.type === 'queue') {
       assert.equal(queued.outcome.item.status, 'pending');
       assert.equal(queued.outcome.item.courseId, 'cs101-sp26');
+      assert.deepEqual(queued.outcome.item.replyTo, ['student@example.edu']);
+      assert.equal(queued.outcome.item.inReplyTo, 'orig-message-id');
+      assert.deepEqual(queued.outcome.item.references, ['orig-message-id']);
       assert.match(queued.outcome.item.draftSubject, /^Re:/);
       assert.match(queued.outcome.item.draftBody, /Course: cs101-sp26/);
       assert.match(queued.outcome.item.draftBody, /Grounding evidence:/);
     }
 
     const econQueued = await processInboundThread(
-      thread({ to: ['econ201@school.edu'], subject: 'Econ201 extension question' }),
+      thread({ to: ['econ201@school.edu'], subject: 'Econ201 extension question', from: 'econ-student@example.edu' }),
       (courseId) => roots[courseId] ?? '',
       {
         routeConfig: config,
@@ -100,6 +105,9 @@ export async function runProcessInboundThreadTests() {
     );
     assert.equal(econQueued.route.courseId, 'econ201-sp26');
     assert.equal(econQueued.outcome.type, 'queue');
+    if (econQueued.outcome.type === 'queue') {
+      assert.deepEqual(econQueued.outcome.item.replyTo, ['econ-student@example.edu']);
+    }
 
     const escalated = await processInboundThread(thread(), (courseId) => roots[courseId] ?? '', {
       routeConfig: config,

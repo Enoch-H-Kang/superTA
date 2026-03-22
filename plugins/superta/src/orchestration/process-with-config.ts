@@ -8,7 +8,7 @@ export async function processInboundThreadWithConfig(
   config: SuperTAConfig,
   thread: NormalizedThread,
   options: {
-    classify?: (input: { thread: NormalizedThread; courseId?: string }) => Classification;
+    classify?: (input: { thread: NormalizedThread; courseId?: string }) => Classification | Promise<Classification>;
   } = {},
 ) {
   return processInboundThread(thread, (courseId) => resolveCourseRoot(config, courseId), {

@@ -3,9 +3,12 @@ import type { ReviewQueueItem } from '../actions/review-queue.js';
 
 export async function draftFromReviewItem(client: GmailClient, item: ReviewQueueItem) {
   const request: GmailDraftRequest = {
-    to: [],
+    to: item.replyTo,
     subject: item.draftSubject,
     body: item.draftBody,
+    threadId: item.threadId,
+    inReplyTo: item.inReplyTo,
+    references: item.references,
   };
 
   return client.createDraft(request);
@@ -21,6 +24,8 @@ export async function sendApprovedReviewItem(client: GmailClient, item: ReviewQu
     subject: item.draftSubject,
     body: item.draftBody,
     threadId: item.threadId,
+    inReplyTo: item.inReplyTo,
+    references: item.references,
   };
 
   return client.sendMessage(request);

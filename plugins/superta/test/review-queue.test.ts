@@ -21,6 +21,9 @@ export function runReviewQueueTests() {
     threadId: 'thread-1',
     messageId: 'msg-1',
     courseId: 'cs101-sp26',
+    replyTo: ['student@example.edu'],
+    inReplyTo: 'orig-message-id',
+    references: ['orig-message-id'],
     classification: classification(),
     evidence: [],
     draftSubject: 'Re: Question',
@@ -29,6 +32,9 @@ export function runReviewQueueTests() {
 
   assert.equal(item.status, 'pending');
   assert.equal(item.courseId, 'cs101-sp26');
+  assert.deepEqual(item.replyTo, ['student@example.edu']);
+  assert.equal(item.inReplyTo, 'orig-message-id');
+  assert.deepEqual(item.references, ['orig-message-id']);
 
   const approved = updateReviewStatus(item, 'approved');
   assert.equal(approved.status, 'approved');
