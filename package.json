@@ -5,8 +5,11 @@
   "description": "Gmail-backed OpenClaw teaching delegate scaffold",
   "type": "module",
   "scripts": {
-    "build": "echo 'build scaffold pending'",
-    "test": "echo 'test scaffold pending'",
+    "build": "tsc -p tsconfig.json",
+    "test": "node dist/evals/run-evals.js",
     "lint": "echo 'lint scaffold pending'"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
   }
 }
