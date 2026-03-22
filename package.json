@@ -1,0 +1,12 @@
+{
+  "name": "superta",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gmail-backed OpenClaw teaching delegate scaffold",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'build scaffold pending'",
+    "test": "echo 'test scaffold pending'",
+    "lint": "echo 'lint scaffold pending'"
+  }
+}
