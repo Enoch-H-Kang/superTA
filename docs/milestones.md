@@ -190,3 +190,16 @@ Issues:
 - Write sample course setup guide
 - Add demo fixture and walkthrough
 - Run pilot-readiness checklist
+
+## Milestone update — current highest-priority gaps
+
+The repo has now validated live Gmail development access for:
+- listing recent threads
+- fetching a real thread
+- creating a real draft reply
+
+That shifts the highest-priority gaps to:
+- wiring live Gmail into actual plugin/runtime flows instead of standalone smoke tests
+- implementing refresh-token-based access token renewal
+- completing inbound Gmail watch/history/webhook handling with idempotency
+- connecting the live classifier path while keeping deterministic policy as the final gate

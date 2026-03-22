@@ -51,7 +51,10 @@ This repo already includes:
 - Responses-style classifier scaffolding
 - richer Gmail reply metadata preservation
 - a tested deadline-email vertical slice
-- live Gmail read/fetch/draft smoke-test support
+- live Gmail read/fetch/draft support
+- Gmail refresh-token auth support
+- Gmail webhook/history pipeline scaffolding
+- Gmail watch registration, mailbox-state persistence, and renewal helpers
 
 ---
 
@@ -127,7 +130,7 @@ For more detail, see:
 
 ## Gmail connection guide
 
-SuperTA now has a partial live Gmail integration path for development/testing. Here is the setup flow that worked.
+SuperTA now has a meaningful live Gmail development path. This is the setup flow that worked.
 
 ### 1) Create a Google Cloud project
 In Google Cloud Console:
@@ -192,13 +195,13 @@ You should receive JSON with:
 - `token_type`
 
 ### 6) Export Gmail credentials locally
-For immediate live testing, the simplest path is an access token:
+For quick smoke testing, you can use a direct access token:
 
 ```bash
 export GMAIL_ACCESS_TOKEN='...'
 ```
 
-The scaffold also recognizes:
+For a more sustainable setup, SuperTA also supports:
 
 ```bash
 export GMAIL_CLIENT_ID='...'
@@ -206,12 +209,12 @@ export GMAIL_CLIENT_SECRET='...'
 export GMAIL_REFRESH_TOKEN='...'
 ```
 
-Current limitation:
-- the scaffold **validates** refresh-token style config
-- but **token refresh is not implemented yet**
-- so right now, live calls still rely on `GMAIL_ACCESS_TOKEN`
+### Current auth behavior
+- if `GMAIL_ACCESS_TOKEN` is present, SuperTA uses it directly
+- otherwise, if `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, and `GMAIL_REFRESH_TOKEN` are present, SuperTA will request a fresh access token automatically
+- `GMAIL_ACCESS_TOKEN` is still the fastest path for quick smoke tests, but refresh-token auth is now implemented
 
-### 7) Run live Gmail smoke tests
+### 7) Run live Gmail checks
 From the `superta/` directory:
 
 #### List recent threads
@@ -228,6 +231,35 @@ node dist/plugins/superta/src/gmail/live-smoke-test.js <threadId>
 ```bash
 node dist/plugins/superta/src/gmail/live-draft-smoke-test.js <threadId>
 ```
+
+#### Register a Gmail watch
+```bash
+node dist/plugins/superta/src/gmail/register-watch.js <topicName> [emailAddress] [include|exclude] [labelId ...]
+```
+
+Example:
+```bash
+node dist/plugins/superta/src/gmail/register-watch.js projects/your-project/topics/gmail hynwk.kang@gmail.com include INBOX
+```
+
+This asks Gmail to start sending mailbox change notifications to the Pub/Sub topic you specify.
+
+#### Run one live thread through the real SuperTA pipeline
+```bash
+node dist/plugins/superta/src/gmail/live-inbound-runner.js <threadId> [configPath] [stateRoot]
+```
+
+Example:
+```bash
+node dist/plugins/superta/src/gmail/live-inbound-runner.js 19d175ec1f41f58a local.config.json .
+```
+
+This:
+- loads SuperTA config from disk
+- fetches a real Gmail thread
+- normalizes it
+- runs routing, retrieval, classification, and policy
+- persists review queue and audit state
 
 ### 8) Security warning
 For real use, do **not** paste these values into chat or commit them to the repo:
@@ -299,7 +331,7 @@ This is still a prototype, so “usage” currently means:
 - exploring the vertical slice
 - extending the plugin scaffold
 - experimenting with local configs and mocked providers
-- trying the Gmail smoke tests with real credentials in a local dev environment
+- trying the Gmail integration in a local dev environment
 
 This is **not yet** a polished installable OpenClaw plugin release.
 
@@ -333,6 +365,7 @@ Important paths:
 - `docs/gmail-auth.md` — Gmail auth and HTTP client notes
 - `docs/gmail-webhook.md` — Gmail webhook route notes
 - `docs/gmail-history.md` — Gmail history → fetch-target notes
+- `docs/gmail-watch.md` — Gmail watch state and renewal notes
 - `docs/gmail-thread-fetch.md` — Gmail thread fetch → pipeline notes
 
 ---
@@ -382,12 +415,18 @@ SuperTA is built around a few hard constraints:
 - professor command parsing
 - proposal review/apply flow
 - reply metadata preservation
-- Gmail live read/fetch/draft smoke-test path
+- Gmail live read/fetch/draft support
+- Gmail refresh-token auth support
+- Gmail webhook/history pipeline scaffolding
+- idempotent webhook checkpointing
+- watch registration and mailbox state persistence
+- watch renewal helpers
 - demo vertical slice
 
 ### Still scaffolded / incomplete
-- real token refresh flow for Gmail OAuth
-- full live Gmail webhook delivery setup
+- production-ready Gmail Pub/Sub IAM/topic deployment setup
+- full live Gmail webhook delivery deployment story
+- scheduled/automated watch renewal workflow
 - real live OpenAI Responses integration
 - production-grade policy/file mutation logic
 - packaging/install flow for real OpenClaw plugin release
@@ -410,13 +449,38 @@ Short version:
 
 ## Near-term roadmap
 
-Strong next directions include:
-- token refresh support for Gmail OAuth
-- real provider wiring for OpenAI Responses
-- richer live Gmail integration beyond smoke tests
-- more polished FAQ/policy merge behavior
-- packaging for actual OpenClaw plugin usage
-- additional vertical slices beyond deadline-email handling
+Given the current state of the repo, the most useful next implementation steps are:
+
+1. **Promote Gmail from smoke tests to real runtime plumbing**
+   - connect live Gmail fetch/draft behavior into the actual plugin/runtime flow
+   - add provider-backed end-to-end tests for fetch → normalize → route → classify → queue → draft
+   - add idempotency/dedupe handling so the same Gmail history event is safe to replay
+
+2. **Build real inbound Gmail delivery**
+   - finish production-ready watch/history/webhook wiring
+   - document Pub/Sub IAM/topic setup and webhook registration
+   - ensure replay safety and course-isolated processing
+
+3. **Wire in the real classifier provider**
+   - connect the existing Responses adapter to live runtime config
+   - keep deterministic policy enforcement as the final decision layer
+   - add fixture-based tests for routine vs sensitive cases
+
+4. **Improve Gmail reply correctness**
+   - avoid duplicate `Re:` prefixes
+   - improve recipient selection so drafts do not accidentally target the professor/self
+   - return richer Gmail metadata from live calls
+
+5. **Expand vertical slices beyond deadline handling**
+   - routine logistics
+   - office-hours/admin questions
+   - clarification / needs-more-info workflows
+
+6. **Prepare pilot-ready packaging and onboarding**
+   - operator install guide
+   - professor onboarding guide
+   - sample multi-course setup guide
+   - plugin/skill-pack release flow
 
 ---
 

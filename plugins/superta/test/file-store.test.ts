@@ -81,6 +81,24 @@ export async function runFileStoreTests() {
     assert.equal(loadedProposal?.kind, 'faq');
     const proposals = await store.listProposals();
     assert.equal(proposals.length, 1);
+
+    assert.equal(await store.hasProcessedGmailEvent('prof@example.edu:1'), false);
+    await store.markProcessedGmailEvent('prof@example.edu:1');
+    assert.equal(await store.hasProcessedGmailEvent('prof@example.edu:1'), true);
+    const checkpoints = await store.listProcessedGmailEvents();
+    assert.deepEqual(checkpoints, ['prof@example.edu:1']);
+
+    await store.saveGmailMailboxState({
+      emailAddress: 'prof@example.edu',
+      historyId: '123',
+      watchExpiration: '9999999999999',
+      updatedAt: '2026-03-22T22:00:00.000Z',
+    });
+    const mailbox = await store.getGmailMailboxState('prof@example.edu');
+    assert.equal(mailbox?.historyId, '123');
+    assert.equal(mailbox?.watchExpiration, '9999999999999');
+    const mailboxes = await store.listGmailMailboxStates();
+    assert.equal(mailboxes.length, 1);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

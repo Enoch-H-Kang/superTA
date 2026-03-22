@@ -23,12 +23,21 @@ Currently supported:
 - `GMAIL_REFRESH_TOKEN`
 - `GMAIL_API_BASE_URL` (optional override)
 
-## Current limitation
+## Auth behavior
 
-The live HTTP client currently requires `GMAIL_ACCESS_TOKEN` for actual API calls.
+The live HTTP client now supports two paths:
 
-The OAuth trio (`clientId`, `clientSecret`, `refreshToken`) is recognized and validated, but token refresh flow is not implemented yet.
+1. **Direct access token**
+   - use `GMAIL_ACCESS_TOKEN` when you want quick manual testing
+
+2. **Refresh-token flow**
+   - if `GMAIL_ACCESS_TOKEN` is absent, SuperTA will use:
+     - `GMAIL_CLIENT_ID`
+     - `GMAIL_CLIENT_SECRET`
+     - `GMAIL_REFRESH_TOKEN`
+   - it will request a fresh access token from `https://oauth2.googleapis.com/token`
+   - the refreshed access token is then used for Gmail API calls
 
 ## Why this matters
 
-This is the first serious step toward connecting a real Gmail account for live testing.
+This moves SuperTA from one-off manual Gmail access toward a more sustainable live integration path.

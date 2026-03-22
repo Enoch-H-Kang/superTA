@@ -19,4 +19,23 @@ export type ProposalStore = {
   listProposals: () => Promise<ProposalRecord[]>;
 };
 
-export type SuperTAStore = ReviewQueueStore & AuditStore & ProposalStore;
+export type GmailWebhookCheckpointStore = {
+  hasProcessedGmailEvent: (key: string) => Promise<boolean>;
+  markProcessedGmailEvent: (key: string) => Promise<void>;
+  listProcessedGmailEvents: () => Promise<string[]>;
+};
+
+export type GmailMailboxState = {
+  emailAddress: string;
+  historyId?: string;
+  watchExpiration?: string;
+  updatedAt: string;
+};
+
+export type GmailMailboxStateStore = {
+  saveGmailMailboxState: (state: GmailMailboxState) => Promise<void>;
+  getGmailMailboxState: (emailAddress: string) => Promise<GmailMailboxState | null>;
+  listGmailMailboxStates: () => Promise<GmailMailboxState[]>;
+};
+
+export type SuperTAStore = ReviewQueueStore & AuditStore & ProposalStore & GmailWebhookCheckpointStore & GmailMailboxStateStore;

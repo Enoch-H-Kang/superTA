@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import type { PipelineAuditRecord } from '../audit/schemas.js';
 import type { ReviewQueueItem } from '../actions/review-queue.js';
 import type { ProposalRecord } from '../proposals/types.js';
-import type { SuperTAStore } from './store.js';
+import type { GmailMailboxState, SuperTAStore } from './store.js';
 
 async function ensureParent(path: string) {
   await mkdir(dirname(path), { recursive: true });
@@ -27,6 +27,8 @@ export type FileStorePaths = {
   reviewQueuePath: string;
   auditLogPath: string;
   proposalsPath: string;
+  gmailCheckpointPath: string;
+  gmailMailboxStatePath: string;
 };
 
 export function createFileStore(paths: FileStorePaths): SuperTAStore {
@@ -72,6 +74,39 @@ export function createFileStore(paths: FileStorePaths): SuperTAStore {
     async listProposals() {
       return readJsonFile<ProposalRecord[]>(paths.proposalsPath, []);
     },
+
+    async hasProcessedGmailEvent(key: string) {
+      const keys = await readJsonFile<string[]>(paths.gmailCheckpointPath, []);
+      return keys.includes(key);
+    },
+
+    async markProcessedGmailEvent(key: string) {
+      const keys = await readJsonFile<string[]>(paths.gmailCheckpointPath, []);
+      if (!keys.includes(key)) {
+        keys.push(key);
+        await writeJsonFile(paths.gmailCheckpointPath, keys);
+      }
+    },
+
+    async listProcessedGmailEvents() {
+      return readJsonFile<string[]>(paths.gmailCheckpointPath, []);
+    },
+
+    async saveGmailMailboxState(state: GmailMailboxState) {
+      const states = await readJsonFile<GmailMailboxState[]>(paths.gmailMailboxStatePath, []);
+      const next = states.filter((existing) => existing.emailAddress !== state.emailAddress);
+      next.push(state);
+      await writeJsonFile(paths.gmailMailboxStatePath, next);
+    },
+
+    async getGmailMailboxState(emailAddress: string) {
+      const states = await readJsonFile<GmailMailboxState[]>(paths.gmailMailboxStatePath, []);
+      return states.find((state) => state.emailAddress === emailAddress) ?? null;
+    },
+
+    async listGmailMailboxStates() {
+      return readJsonFile<GmailMailboxState[]>(paths.gmailMailboxStatePath, []);
+    },
   };
 }
 
@@ -80,5 +115,7 @@ export function defaultFileStorePaths(root: string): FileStorePaths {
     reviewQueuePath: join(root, 'state', 'review-queue.json'),
     auditLogPath: join(root, 'state', 'audit-log.json'),
     proposalsPath: join(root, 'state', 'proposals.json'),
+    gmailCheckpointPath: join(root, 'state', 'gmail-checkpoints.json'),
+    gmailMailboxStatePath: join(root, 'state', 'gmail-mailboxes.json'),
   };
 }

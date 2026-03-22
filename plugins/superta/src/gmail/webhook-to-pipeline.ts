@@ -7,6 +7,10 @@ import type { SuperTAStore } from '../storage/store.js';
 import { deriveFetchTargetsFromWebhook } from './webhook-to-fetch.js';
 import { fetchAndProcessThreadTarget } from './fetch-and-process.js';
 
+function buildEventCheckpointKey(event: GmailWebhookEvent) {
+  return `${event.emailAddress ?? 'unknown-email'}:${event.historyId ?? 'unknown-history'}`;
+}
+
 export async function processWebhookEventIntoPipeline(
   config: SuperTAConfig,
   store: SuperTAStore,
@@ -15,6 +19,15 @@ export async function processWebhookEventIntoPipeline(
   classifier: ClassifierProvider,
   event: GmailWebhookEvent,
 ) {
+  const checkpointKey = buildEventCheckpointKey(event);
+  if (await store.hasProcessedGmailEvent(checkpointKey)) {
+    return {
+      skipped: true,
+      checkpointKey,
+      results: [],
+    };
+  }
+
   const targets = await deriveFetchTargetsFromWebhook(historyClient, event);
   const results = [];
 
@@ -23,5 +36,21 @@ export async function processWebhookEventIntoPipeline(
     results.push({ target, result });
   }
 
-  return results;
+  if (event.emailAddress) {
+    const prior = await store.getGmailMailboxState(event.emailAddress);
+    await store.saveGmailMailboxState({
+      emailAddress: event.emailAddress,
+      historyId: event.historyId ?? prior?.historyId,
+      watchExpiration: prior?.watchExpiration,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  await store.markProcessedGmailEvent(checkpointKey);
+
+  return {
+    skipped: false,
+    checkpointKey,
+    results,
+  };
 }

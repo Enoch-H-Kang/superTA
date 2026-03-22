@@ -20,6 +20,16 @@ Planned flow:
 4. account/mailbox context is identified
 5. handler triggers thread fetch + SuperTA pipeline work
 
-## Current limitation
+## Current state
 
-The scaffold currently parses and acknowledges webhook payloads, but does not yet fetch Gmail thread data automatically.
+The scaffold now covers more of the full inbound chain:
+- webhook route registration
+- webhook envelope/body parsing
+- history lookup → fetch-target derivation
+- thread fetch → normalize → pipeline bridge
+- idempotent checkpointing for repeated webhook deliveries
+- Gmail watch registration helper for the upstream mailbox watch step
+
+## Remaining limitation
+
+Production Pub/Sub and deployed webhook setup still need environment-specific configuration. The repo now has the API/helper layer, but not a turnkey deployment story.

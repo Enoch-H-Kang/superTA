@@ -8,6 +8,16 @@ export async function runGmailHttpClientTests() {
     async (url, init) => {
       calls.push({ url, init });
 
+      if (String(url) === 'https://oauth2.googleapis.com/token') {
+        return {
+          ok: true,
+          status: 200,
+          async text() {
+            return JSON.stringify({ access_token: 'refreshed-token' });
+          },
+        };
+      }
+
       if (String(url).includes('/threads/thread-123')) {
         return {
           ok: true,
@@ -117,6 +127,31 @@ export async function runGmailHttpClientTests() {
   const sendCall = calls.find((call) => call.url.includes('/users/me/messages/send'));
   assert.ok(sendCall);
   assert.match(sendCall?.init?.body ?? '', /"raw"/);
+
+  const oauthClient = createGmailHttpClient(
+    async (url, init) => {
+      if (String(url) === 'https://oauth2.googleapis.com/token') {
+        return {
+          ok: true,
+          status: 200,
+          async text() {
+            return JSON.stringify({ access_token: 'fresh-token' });
+          },
+        };
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        async text() {
+          return JSON.stringify({ messages: [] });
+        },
+      };
+    },
+    { clientId: 'cid', clientSecret: 'secret', refreshToken: 'refresh', apiBaseUrl: 'https://gmail.test/v1' },
+  );
+
+  await oauthClient.fetchThread('thread-123');
 
   const failingClient = createGmailHttpClient(
     async () => ({

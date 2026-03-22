@@ -9,11 +9,14 @@ import { runDraftReplyTests } from './draft-reply.test.js';
 import { runReviewQueueTests } from './review-queue.test.js';
 import { runActionExecutorTests } from './action-executor.test.js';
 import { runGmailAuthConfigTests } from './gmail-auth-config.test.js';
+import { runGmailRefreshTokenTests } from './gmail-refresh-token.test.js';
 import { runGmailClientTests } from './gmail-client.test.js';
 import { runGmailHttpClientTests } from './gmail-http-client.test.js';
 import { runGmailExecutorTests } from './gmail-executor.test.js';
 import { runGmailWebhookTests } from './gmail-webhook.test.js';
 import { runRegisterGmailWebhookTests } from './register-gmail-webhook.test.js';
+import { runGmailWatchClientTests } from './gmail-watch-client.test.js';
+import { runGmailRenewWatchTests } from './gmail-renew-watch.test.js';
 import { runGmailHistoryTests } from './gmail-history.test.js';
 import { runThreadToNormalizedTests } from './thread-to-normalized.test.js';
 import { runFetchAndProcessTests } from './fetch-and-process.test.js';
@@ -36,6 +39,7 @@ import { runProcessInboundThreadTests } from './process-inbound-thread.test.js';
 import { runProcessWithConfigTests } from './process-with-config.test.js';
 import { runProcessAndStoreTests } from './process-and-store.test.js';
 import { runProcessWithClassifierTests } from './process-with-classifier.test.js';
+import { runLiveInboundRunnerTests } from './live-inbound-runner.test.js';
 
 async function main() {
   runConfigTests();
@@ -49,11 +53,14 @@ async function main() {
   runReviewQueueTests();
   runActionExecutorTests();
   runGmailAuthConfigTests();
+  await runGmailRefreshTokenTests();
   await runGmailClientTests();
   await runGmailHttpClientTests();
   await runGmailExecutorTests();
   await runGmailWebhookTests();
   await runRegisterGmailWebhookTests();
+  await runGmailWatchClientTests();
+  await runGmailRenewWatchTests();
   await runGmailHistoryTests();
   runThreadToNormalizedTests();
   await runFetchAndProcessTests();
@@ -76,6 +83,7 @@ async function main() {
   await runProcessWithConfigTests();
   await runProcessAndStoreTests();
   await runProcessWithClassifierTests();
+  await runLiveInboundRunnerTests();
   console.log('plugin tests passed');
 }
 

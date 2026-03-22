@@ -89,22 +89,43 @@ export async function runWebhookToPipelineTests() {
       },
     };
 
-    const results = await processWebhookEventIntoPipeline(
+    const event = {
+      emailAddress: 'prof@example.edu',
+      historyId: '1',
+      receivedAt: new Date().toISOString(),
+    };
+
+    const first = await processWebhookEventIntoPipeline(
       config,
       store,
       historyClient,
       gmailClient(),
       classifier,
-      {
-        emailAddress: 'prof@example.edu',
-        historyId: '1',
-        receivedAt: new Date().toISOString(),
-      },
+      event,
     );
 
-    assert.equal(results.length, 1);
-    assert.equal(results[0]?.target.threadId, 'thread-123');
-    assert.equal(results[0]?.result.outcome.type, 'queue');
+    assert.equal(first.skipped, false);
+    assert.equal(first.results.length, 1);
+    assert.equal(first.results[0]?.target.threadId, 'thread-123');
+    assert.equal(first.results[0]?.result.outcome.type, 'queue');
+
+    const second = await processWebhookEventIntoPipeline(
+      config,
+      store,
+      historyClient,
+      gmailClient(),
+      classifier,
+      event,
+    );
+
+    assert.equal(second.skipped, true);
+    assert.equal(second.results.length, 0);
+
+    const checkpoints = await store.listProcessedGmailEvents();
+    assert.deepEqual(checkpoints, ['prof@example.edu:1']);
+
+    const mailbox = await store.getGmailMailboxState('prof@example.edu');
+    assert.equal(mailbox?.historyId, '1');
   } finally {
     await rm(courseRoot, { recursive: true, force: true });
     await rm(stateRoot, { recursive: true, force: true });
