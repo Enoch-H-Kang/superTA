@@ -51,6 +51,7 @@ This repo already includes:
 - Responses-style classifier scaffolding
 - richer Gmail reply metadata preservation
 - a tested deadline-email vertical slice
+- live Gmail read/fetch/draft smoke-test support
 
 ---
 
@@ -124,6 +125,120 @@ For more detail, see:
 
 ---
 
+## Gmail connection guide
+
+SuperTA now has a partial live Gmail integration path for development/testing. Here is the setup flow that worked.
+
+### 1) Create a Google Cloud project
+In Google Cloud Console:
+- create/select a project
+- enable the **Gmail API**
+
+### 2) Configure OAuth consent screen
+In **Google Cloud Console → APIs & Services → OAuth consent screen**:
+- configure the app name
+- keep the app in **Testing** mode for development
+- under **Audience** / **Test users**, add the Google account you will authorize with
+
+If you skip test users while in testing mode, Google returns:
+- `Error 403: access_denied`
+
+### 3) Create OAuth client credentials
+In **APIs & Services → Credentials**:
+- create **OAuth client ID**
+- choose **Desktop app**
+
+This gives you:
+- `client_id`
+- `client_secret`
+
+### 4) Generate an authorization code
+Open an OAuth URL like this in your browser:
+
+```text
+https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.modify%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.send&access_type=offline&prompt=consent
+```
+
+Notes:
+- `redirect_uri=http://localhost`
+- `access_type=offline` is important for getting a refresh token
+- `prompt=consent` helps ensure Google returns the refresh token
+- for the current SuperTA prototype, the useful scopes are:
+  - `https://www.googleapis.com/auth/gmail.modify`
+  - `https://www.googleapis.com/auth/gmail.send`
+
+After approval, the browser will try to open `http://localhost/?code=...` and likely show a connection failure. That is expected.
+
+Copy the `code=...` value from the URL.
+
+### 5) Exchange the authorization code for tokens
+Run:
+
+```bash
+curl -X POST https://oauth2.googleapis.com/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "code=YOUR_AUTH_CODE" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET" \
+  -d "redirect_uri=http://localhost" \
+  -d "grant_type=authorization_code"
+```
+
+You should receive JSON with:
+- `access_token`
+- `refresh_token`
+- `expires_in`
+- `scope`
+- `token_type`
+
+### 6) Export Gmail credentials locally
+For immediate live testing, the simplest path is an access token:
+
+```bash
+export GMAIL_ACCESS_TOKEN='...'
+```
+
+The scaffold also recognizes:
+
+```bash
+export GMAIL_CLIENT_ID='...'
+export GMAIL_CLIENT_SECRET='...'
+export GMAIL_REFRESH_TOKEN='...'
+```
+
+Current limitation:
+- the scaffold **validates** refresh-token style config
+- but **token refresh is not implemented yet**
+- so right now, live calls still rely on `GMAIL_ACCESS_TOKEN`
+
+### 7) Run live Gmail smoke tests
+From the `superta/` directory:
+
+#### List recent threads
+```bash
+node dist/plugins/superta/src/gmail/list-threads-smoke-test.js 5
+```
+
+#### Fetch one real thread
+```bash
+node dist/plugins/superta/src/gmail/live-smoke-test.js <threadId>
+```
+
+#### Create a draft reply for one thread
+```bash
+node dist/plugins/superta/src/gmail/live-draft-smoke-test.js <threadId>
+```
+
+### 8) Security warning
+For real use, do **not** paste these values into chat or commit them to the repo:
+- client secret
+- access token
+- refresh token
+
+If you exposed them during testing, rotate them afterward.
+
+---
+
 ## First demo workflow
 
 The clearest end-to-end demo right now is the **deadline email workflow**.
@@ -184,6 +299,7 @@ This is still a prototype, so “usage” currently means:
 - exploring the vertical slice
 - extending the plugin scaffold
 - experimenting with local configs and mocked providers
+- trying the Gmail smoke tests with real credentials in a local dev environment
 
 This is **not yet** a polished installable OpenClaw plugin release.
 
@@ -214,6 +330,10 @@ Important paths:
 - `docs/proposals.md` — FAQ/policy proposal behavior
 - `docs/responses-classifier.md` — classifier adapter overview
 - `docs/responses-http-client.md` — HTTP client scaffold notes
+- `docs/gmail-auth.md` — Gmail auth and HTTP client notes
+- `docs/gmail-webhook.md` — Gmail webhook route notes
+- `docs/gmail-history.md` — Gmail history → fetch-target notes
+- `docs/gmail-thread-fetch.md` — Gmail thread fetch → pipeline notes
 
 ---
 
@@ -262,10 +382,12 @@ SuperTA is built around a few hard constraints:
 - professor command parsing
 - proposal review/apply flow
 - reply metadata preservation
+- Gmail live read/fetch/draft smoke-test path
 - demo vertical slice
 
 ### Still scaffolded / incomplete
-- real live Gmail integration
+- real token refresh flow for Gmail OAuth
+- full live Gmail webhook delivery setup
 - real live OpenAI Responses integration
 - production-grade policy/file mutation logic
 - packaging/install flow for real OpenClaw plugin release
@@ -281,7 +403,7 @@ See:
 Short version:
 - keep safety and bounded execution first
 - preserve deterministic controls around model output
-- add tests when changing routing, policy, drafting, persistence, or provider boundaries
+- add tests when changing routing, policy, drafting, persistence, provider boundaries, or Gmail integration code
 - update docs when behavior changes
 
 ---
@@ -289,8 +411,9 @@ Short version:
 ## Near-term roadmap
 
 Strong next directions include:
+- token refresh support for Gmail OAuth
 - real provider wiring for OpenAI Responses
-- richer Gmail integration and reply semantics
+- richer live Gmail integration beyond smoke tests
 - more polished FAQ/policy merge behavior
 - packaging for actual OpenClaw plugin usage
 - additional vertical slices beyond deadline-email handling
