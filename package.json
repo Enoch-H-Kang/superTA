@@ -6,10 +6,11 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "node dist/evals/run-evals.js",
+    "test": "node dist/plugins/superta/test/run-tests.js && node dist/evals/run-evals.js",
     "lint": "echo 'lint scaffold pending'"
   },
   "devDependencies": {
+    "@types/node": "^24.5.2",
     "typescript": "^5.9.2"
   }
 }
