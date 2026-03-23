@@ -1,10 +1,16 @@
 import type { GmailClient, GmailDraftRequest, GmailForwardRequest, GmailLabelRequest, GmailSendRequest } from './client.js';
 import type { ReviewQueueItem } from '../actions/review-queue.js';
+import { filterReplyRecipients, normalizeReplySubject, resolveSelfAddresses } from './reply-helpers.js';
+
+function buildReplyRecipients(item: ReviewQueueItem) {
+  const filtered = filterReplyRecipients(item.replyTo, resolveSelfAddresses());
+  return filtered.length > 0 ? filtered : item.replyTo;
+}
 
 export async function draftFromReviewItem(client: GmailClient, item: ReviewQueueItem) {
   const request: GmailDraftRequest = {
-    to: item.replyTo,
-    subject: item.draftSubject,
+    to: buildReplyRecipients(item),
+    subject: normalizeReplySubject(item.draftSubject),
     body: item.draftBody,
     threadId: item.threadId,
     inReplyTo: item.inReplyTo,
@@ -20,8 +26,8 @@ export async function sendApprovedReviewItem(client: GmailClient, item: ReviewQu
   }
 
   const request: GmailSendRequest = {
-    to,
-    subject: item.draftSubject,
+    to: filterReplyRecipients(to, resolveSelfAddresses()),
+    subject: normalizeReplySubject(item.draftSubject),
     body: item.draftBody,
     threadId: item.threadId,
     inReplyTo: item.inReplyTo,

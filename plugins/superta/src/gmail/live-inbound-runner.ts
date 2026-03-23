@@ -1,12 +1,11 @@
 import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { loadConfigFromFile } from '../config/load-config.js';
-import { createStubClassifierProvider } from '../classifier/stub-provider.js';
+import { resolveRuntimeClassifierConfig, createRuntimeClassifierProvider, classifyWithRuntimeFallback } from '../classifier/runtime.js';
 import { resolveGmailAuthConfig } from './auth-config.js';
 import { createGmailHttpClient } from './http-client.js';
 import { normalizeGmailThread } from './thread-to-normalized.js';
 import { createFileStore, defaultFileStorePaths } from '../storage/file-store.js';
-import { processInboundThreadWithClassifier } from '../orchestration/process-with-classifier.js';
+import { processInboundThreadAndStore } from '../orchestration/process-and-store.js';
 
 export type LiveInboundRunnerOptions = {
   configPath: string;
@@ -18,11 +17,13 @@ export async function runLiveInboundThread(options: LiveInboundRunnerOptions) {
   const config = await loadConfigFromFile(options.configPath);
   const gmailClient = createGmailHttpClient(fetch as any, resolveGmailAuthConfig());
   const store = createFileStore(defaultFileStorePaths(options.stateRoot ?? process.cwd()));
-  const classifier = createStubClassifierProvider();
+  const classifierProvider = createRuntimeClassifierProvider(resolveRuntimeClassifierConfig(), fetch as any);
 
   const gmailThread = await gmailClient.fetchThread(options.threadId);
   const normalized = normalizeGmailThread(gmailThread);
-  const result = await processInboundThreadWithClassifier(config, store, classifier, normalized);
+  const result = await processInboundThreadAndStore(config, store, normalized, {
+    classify: (input) => classifyWithRuntimeFallback(classifierProvider, input),
+  });
 
   const reviewItems = await store.listReviewItems();
   const auditRecords = await store.listAuditRecords();
@@ -30,6 +31,7 @@ export async function runLiveInboundThread(options: LiveInboundRunnerOptions) {
   return {
     ok: true,
     threadId: options.threadId,
+    classifierProvider: resolveRuntimeClassifierConfig().provider,
     normalized: {
       from: normalized.from,
       to: normalized.to,
@@ -48,7 +50,7 @@ export async function runLiveInboundThread(options: LiveInboundRunnerOptions) {
   };
 }
 
-const currentFile = fileURLToPath(import.meta.url);
+const currentFile = new URL(import.meta.url).pathname;
 if (process.argv[1] && resolve(process.argv[1]) === currentFile) {
   const threadId = process.argv[2];
   const configPath = process.argv[3] ?? 'local.config.json';

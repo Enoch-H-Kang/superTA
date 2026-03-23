@@ -9,6 +9,7 @@ import { runDraftReplyTests } from './draft-reply.test.js';
 import { runReviewQueueTests } from './review-queue.test.js';
 import { runActionExecutorTests } from './action-executor.test.js';
 import { runGmailAuthConfigTests } from './gmail-auth-config.test.js';
+import { runGmailReplyHelpersTests } from './gmail-reply-helpers.test.js';
 import { runGmailRefreshTokenTests } from './gmail-refresh-token.test.js';
 import { runGmailClientTests } from './gmail-client.test.js';
 import { runGmailHttpClientTests } from './gmail-http-client.test.js';
@@ -24,6 +25,10 @@ import { runWebhookToPipelineTests } from './webhook-to-pipeline.test.js';
 import { runAuditLoggerTests } from './audit-logger.test.js';
 import { runFileStoreTests } from './file-store.test.js';
 import { runStubClassifierTests } from './stub-classifier.test.js';
+import { runRuntimeClassifierTests } from './runtime-classifier.test.js';
+import { runRuntimeFailClosedTests } from './runtime-fail-closed.test.js';
+import { runClassifierFixtureTests } from './classifier-fixtures.test.js';
+import { runLiveResponsesFixtureTests } from './live-responses-fixtures.test.js';
 import { runValidateClassificationTests } from './validate-classification.test.js';
 import { runParseOpenAIResponsesOutputTests } from './parse-openai-responses-output.test.js';
 import { runResponsesAdapterTests } from './responses-adapter.test.js';
@@ -33,6 +38,17 @@ import { runProfessorCommandParserTests } from './parse-professor-command.test.j
 import { runProcessProfessorCommandTests } from './process-professor-command.test.js';
 import { runExecuteProfessorCommandTests } from './execute-professor-command.test.js';
 import { runExecuteProfessorSendTests } from './execute-professor-send.test.js';
+import { runRuntimeApproveSendTests } from './runtime-approve-send.test.js';
+import { runRuntimeDraftSendTests } from './runtime-draft-send.test.js';
+import { runInspectStateTests } from './inspect-state.test.js';
+import { runOperatorCommandTests } from './operator-commands.test.js';
+import { runSetupWorkflowTests } from './setup-workflow.test.js';
+import { runDoctorTests } from './doctor.test.js';
+import { runProductionEnvTests } from './production-env.test.js';
+import { runRenewWatchesCommandTests } from './renew-watches-command.test.js';
+import { runSetupUxTests } from './setup-ux.test.js';
+import { runInteractiveSetupTests } from './interactive-setup.test.js';
+import { runOperatorOutputTests } from './operator-output.test.js';
 import { runProposalReviewAndApplyTests } from './proposal-review-and-apply.test.js';
 import { runDeadlineWorkflowTests } from './deadline-workflow.test.js';
 import { runProcessInboundThreadTests } from './process-inbound-thread.test.js';
@@ -53,6 +69,7 @@ async function main() {
   runReviewQueueTests();
   runActionExecutorTests();
   runGmailAuthConfigTests();
+  runGmailReplyHelpersTests();
   await runGmailRefreshTokenTests();
   await runGmailClientTests();
   await runGmailHttpClientTests();
@@ -68,6 +85,10 @@ async function main() {
   runAuditLoggerTests();
   await runFileStoreTests();
   await runStubClassifierTests();
+  await runRuntimeClassifierTests();
+  await runRuntimeFailClosedTests();
+  await runClassifierFixtureTests();
+  await runLiveResponsesFixtureTests();
   runValidateClassificationTests();
   runParseOpenAIResponsesOutputTests();
   await runResponsesAdapterTests();
@@ -77,6 +98,17 @@ async function main() {
   runProcessProfessorCommandTests();
   await runExecuteProfessorCommandTests();
   await runExecuteProfessorSendTests();
+  await runRuntimeApproveSendTests();
+  await runRuntimeDraftSendTests();
+  await runInspectStateTests();
+  await runOperatorCommandTests();
+  await runSetupWorkflowTests();
+  await runDoctorTests();
+  runProductionEnvTests();
+  await runRenewWatchesCommandTests();
+  await runSetupUxTests();
+  await runInteractiveSetupTests();
+  runOperatorOutputTests();
   await runProposalReviewAndApplyTests();
   await runDeadlineWorkflowTests();
   await runProcessInboundThreadTests();
@@ -84,7 +116,13 @@ async function main() {
   await runProcessAndStoreTests();
   await runProcessWithClassifierTests();
   await runLiveInboundRunnerTests();
+  await runPluginEntryTests();
+  await runPluginSmokeTests();
   console.log('plugin tests passed');
+}
+
+await main();
+sts passed');
 }
 
 await main();

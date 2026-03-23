@@ -1,5 +1,6 @@
 import type { Classification } from '../routing/classify.js';
 import type { EvidenceItem } from '../retrieval/build-evidence-bundle.js';
+import { normalizeReplySubject } from '../gmail/reply-helpers.js';
 
 export type DraftReplyInput = {
   courseId?: string;
@@ -10,6 +11,7 @@ export type DraftReplyInput = {
 
 export type DraftReplyResult = {
   subjectPrefix: string;
+  subject: string;
   body: string;
   evidenceSummary: string[];
 };
@@ -44,7 +46,8 @@ function buildBody(input: DraftReplyInput) {
 
 export function draftReply(input: DraftReplyInput): DraftReplyResult {
   return {
-    subjectPrefix: 'Re:',
+    subjectPrefix: /^re\s*:/i.test(input.originalSubject.trim()) ? '' : 'Re:',
+    subject: normalizeReplySubject(input.originalSubject),
     body: buildBody(input),
     evidenceSummary: summarizeEvidence(input.evidence),
   };

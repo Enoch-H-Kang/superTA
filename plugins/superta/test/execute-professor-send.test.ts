@@ -58,6 +58,10 @@ export async function runExecuteProfessorSendTests() {
 
     const loaded = await store.getReviewItem('rq-approved');
     assert.equal(loaded?.status, 'sent');
+    const outbound = await store.listOutboundActionRecords();
+    assert.equal(outbound.length, 1);
+    assert.equal(outbound[0]?.type, 'send');
+    assert.equal(outbound[0]?.messageId, 'sent-1');
 
     const missing = await executeApprovedSend(store, gmail, 'rq-missing');
     assert.equal(missing.ok, false);

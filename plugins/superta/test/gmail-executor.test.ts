@@ -23,7 +23,7 @@ function baseItem() {
     threadId: 'thread-1',
     messageId: 'msg-1',
     courseId: 'cs101-sp26',
-    replyTo: ['student@example.edu'],
+    replyTo: ['student@example.edu', 'Prof <prof@example.edu>'],
     inReplyTo: 'orig-message-id',
     references: ['orig-message-id', 'older-message-id'],
     classification: classification(),
@@ -34,6 +34,9 @@ function baseItem() {
 }
 
 export async function runGmailExecutorTests() {
+  const originalAccountEmail = process.env.GMAIL_ACCOUNT_EMAIL;
+  process.env.GMAIL_ACCOUNT_EMAIL = 'prof@example.edu';
+
   const client = createMockGmailClient();
   const pending = baseItem();
 
@@ -43,7 +46,7 @@ export async function runGmailExecutorTests() {
   await assert.rejects(() => sendApprovedReviewItem(client, pending, ['student@example.edu']), /Only approved review items/);
 
   const approved = updateReviewStatus(pending, 'approved');
-  const sent = await sendApprovedReviewItem(client, approved, ['student@example.edu']);
+  const sent = await sendApprovedReviewItem(client, approved, ['student@example.edu', 'prof@example.edu']);
   assert.equal(sent.status, 'sent');
 
   const forwarded = await forwardReviewThread(client, pending, ['prof@example.edu'], 'Please review');
@@ -52,4 +55,10 @@ export async function runGmailExecutorTests() {
   const labeled = await labelReviewThread(client, pending, ['needs-review']);
   assert.equal(labeled.status, 'labeled');
   assert.deepEqual(labeled.labels, ['needs-review']);
+
+  if (originalAccountEmail === undefined) {
+    delete process.env.GMAIL_ACCOUNT_EMAIL;
+  } else {
+    process.env.GMAIL_ACCOUNT_EMAIL = originalAccountEmail;
+  }
 }

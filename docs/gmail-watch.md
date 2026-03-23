@@ -33,9 +33,12 @@ File-backed stores now persist mailbox state under:
 - webhook processing updates the mailbox `historyId`
 - repeated webhook deliveries can still be skipped via `state/gmail-checkpoints.json`
 - expiring mailbox watches can be detected and renewed programmatically
+- renewal now has operator-facing command/report wrappers
 
-Key helper:
+Key helpers:
 - `plugins/superta/src/gmail/renew-watch.ts`
+- `plugins/superta/src/setup/renew-watches.ts`
+- `plugins/superta/src/setup/renew-watches-report.ts`
 
 ## Remaining limitation
 

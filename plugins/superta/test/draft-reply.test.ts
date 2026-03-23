@@ -41,10 +41,20 @@ export function runDraftReplyTests() {
   });
 
   assert.equal(draft.subjectPrefix, 'Re:');
+  assert.equal(draft.subject, 'Re: Question about late work');
   assert.equal(draft.evidenceSummary.length, 2);
   assert.match(draft.body, /Course: cs101-sp26/);
   assert.match(draft.body, /Category: deadline/);
   assert.match(draft.body, /late_days: 2/);
+
+  const alreadyReply = draftReply({
+    courseId: 'cs101-sp26',
+    originalSubject: 'Re: Question',
+    classification: classification(),
+    evidence: [],
+  });
+  assert.equal(alreadyReply.subjectPrefix, '');
+  assert.equal(alreadyReply.subject, 'Re: Question');
 
   const notifyDraft = draftReply({
     courseId: 'cs101-sp26',

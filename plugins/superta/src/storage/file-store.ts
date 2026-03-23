@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import type { PipelineAuditRecord } from '../audit/schemas.js';
 import type { ReviewQueueItem } from '../actions/review-queue.js';
 import type { ProposalRecord } from '../proposals/types.js';
-import type { GmailMailboxState, SuperTAStore } from './store.js';
+import type { GmailMailboxState, OutboundActionRecord, SuperTAStore } from './store.js';
 
 async function ensureParent(path: string) {
   await mkdir(dirname(path), { recursive: true });
@@ -29,6 +29,7 @@ export type FileStorePaths = {
   proposalsPath: string;
   gmailCheckpointPath: string;
   gmailMailboxStatePath: string;
+  outboundActionsPath: string;
 };
 
 export function createFileStore(paths: FileStorePaths): SuperTAStore {
@@ -107,6 +108,16 @@ export function createFileStore(paths: FileStorePaths): SuperTAStore {
     async listGmailMailboxStates() {
       return readJsonFile<GmailMailboxState[]>(paths.gmailMailboxStatePath, []);
     },
+
+    async appendOutboundActionRecord(record: OutboundActionRecord) {
+      const records = await readJsonFile<OutboundActionRecord[]>(paths.outboundActionsPath, []);
+      records.push(record);
+      await writeJsonFile(paths.outboundActionsPath, records);
+    },
+
+    async listOutboundActionRecords() {
+      return readJsonFile<OutboundActionRecord[]>(paths.outboundActionsPath, []);
+    },
   };
 }
 
@@ -117,5 +128,6 @@ export function defaultFileStorePaths(root: string): FileStorePaths {
     proposalsPath: join(root, 'state', 'proposals.json'),
     gmailCheckpointPath: join(root, 'state', 'gmail-checkpoints.json'),
     gmailMailboxStatePath: join(root, 'state', 'gmail-mailboxes.json'),
+    outboundActionsPath: join(root, 'state', 'outbound-actions.json'),
   };
 }

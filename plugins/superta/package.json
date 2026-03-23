@@ -1,0 +1,23 @@
+{
+  "name": "@openclaw/superta",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SuperTA OpenClaw plugin for one professor across multiple live courses",
+  "main": "dist/plugin/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./plugin": "./dist/plugin/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "openclaw",
+    "openclaw-plugin",
+    "gmail",
+    "education",
+    "teaching"
+  ]
+}

@@ -16,6 +16,14 @@ SuperTA now includes the next bridge from Gmail events into the main agent pipel
 4. Gmail thread is normalized into SuperTA's internal thread shape
 5. existing classifier/policy/queue pipeline runs
 
-## Current limitation
+## Current behavior
 
-The Gmail client is still mocked, so this is a realistic scaffold rather than a live Gmail integration.
+This layer now sits on top of a live-capable Gmail client boundary.
+
+It also includes basic reply-correctness behavior during normalization:
+- prefer the latest external message over the assistant/professor's own latest message when possible
+- preserve thread/reply metadata for downstream draft/send behavior
+
+## Remaining limitation
+
+This still depends on surrounding runtime/config scaffolds for full production behavior.

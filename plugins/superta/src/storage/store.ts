@@ -38,4 +38,25 @@ export type GmailMailboxStateStore = {
   listGmailMailboxStates: () => Promise<GmailMailboxState[]>;
 };
 
-export type SuperTAStore = ReviewQueueStore & AuditStore & ProposalStore & GmailWebhookCheckpointStore & GmailMailboxStateStore;
+export type OutboundActionRecord = {
+  type: 'draft' | 'send';
+  reviewItemId: string;
+  threadId: string;
+  messageId?: string;
+  recipients: string[];
+  subject: string;
+  recordedAt: string;
+};
+
+export type OutboundActionStore = {
+  appendOutboundActionRecord: (record: OutboundActionRecord) => Promise<void>;
+  listOutboundActionRecords: () => Promise<OutboundActionRecord[]>;
+};
+
+export type SuperTAStore =
+  & ReviewQueueStore
+  & AuditStore
+  & ProposalStore
+  & GmailWebhookCheckpointStore
+  & GmailMailboxStateStore
+  & OutboundActionStore;

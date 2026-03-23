@@ -1,24 +1,55 @@
-# SuperTA Responses Classifier Scaffold
+# SuperTA Responses Classifier
 
-This scaffold adds a model-adapter boundary for future Responses API integration.
+This is the **optional advanced** classifier path.
 
-## Current pieces
+## Important
 
-- `buildResponsesRequest(config, input)`
-- `createResponsesClassifierProvider(config, client)`
-- `createMockResponsesClient(response)`
+SuperTA’s default public/plugin story does **not** require OpenAI or any extra model API.
 
-## Purpose
+The Responses-backed classifier is:
+- optional
+- advanced
+- experimental
+- useful for prompt hardening and classifier experimentation
 
-The goal is to keep the classifier pipeline stable while swapping in a real model-backed client later.
+## What exists
 
-## Current status
+- runtime classifier selection (`stub` or `responses`)
+- Responses adapter
+- Responses HTTP client
+- fixture-based classifier evals
+- live comparison mode for fixture mismatches
 
-- request shape is defined
-- provider interface is compatible with the async classifier boundary
-- tests use a mock client
-- no live API calls are made yet
+## When to use this
 
-## Next likely step
+Use this path if you want to:
+- experiment with model-backed classification
+- compare live model outputs to the fixture corpus
+- harden prompts against tricky cases
 
-Implement a real client that maps Responses API output into the `Classification` schema.
+## What you need
+
+Typical env:
+- `SUPERTA_CLASSIFIER_PROVIDER=responses`
+- `OPENAI_API_KEY=...`
+
+Optional overrides:
+- `SUPERTA_RESPONSES_MODEL`
+- `SUPERTA_RESPONSES_SYSTEM_PROMPT`
+- `SUPERTA_RESPONSES_API_KEY_ENV`
+- `SUPERTA_RESPONSES_ENDPOINT`
+
+## Live comparison mode
+
+```bash
+export SUPERTA_CLASSIFIER_PROVIDER=responses
+export OPENAI_API_KEY='...'
+node dist/evals/run-live-responses-fixtures.js
+```
+
+This reports fixture-by-fixture mismatches so you can inspect drift and refine prompts.
+
+## Recommendation
+
+Treat this as an experimental extension.
+Do **not** make it the default requirement for installing or trying SuperTA.

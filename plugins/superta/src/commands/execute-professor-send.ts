@@ -2,6 +2,7 @@ import type { SuperTAStore } from '../storage/store.js';
 import type { GmailClient } from '../gmail/client.js';
 import { sendApprovedReviewItem } from '../gmail/executor.js';
 import { updateReviewStatus } from '../actions/review-queue.js';
+import { filterReplyRecipients, resolveSelfAddresses } from '../gmail/reply-helpers.js';
 
 export type ProfessorSendResult =
   | { type: 'send'; ok: true; reviewItemId: string; messageId: string; recipients: string[]; reason: string }
@@ -40,16 +41,27 @@ export async function executeApprovedSend(
     };
   }
 
-  const sent = await sendApprovedReviewItem(gmailClient, item, item.replyTo);
+  const recipients = filterReplyRecipients(item.replyTo, resolveSelfAddresses());
+  const finalRecipients = recipients.length > 0 ? recipients : item.replyTo;
+  const sent = await sendApprovedReviewItem(gmailClient, item, finalRecipients);
   const updated = updateReviewStatus(item, 'sent');
   await store.saveReviewItem(updated);
+  await store.appendOutboundActionRecord({
+    type: 'send',
+    reviewItemId,
+    threadId: item.threadId,
+    messageId: sent.id,
+    recipients: finalRecipients,
+    subject: item.draftSubject,
+    recordedAt: new Date().toISOString(),
+  });
 
   return {
     type: 'send',
     ok: true,
     reviewItemId,
     messageId: sent.id,
-    recipients: item.replyTo,
-    reason: 'Approved review item sent to preserved recipients and persisted.',
+    recipients: finalRecipients,
+    reason: 'Approved review item sent to filtered recipients and persisted.',
   };
 }

@@ -99,6 +99,19 @@ export async function runFileStoreTests() {
     assert.equal(mailbox?.watchExpiration, '9999999999999');
     const mailboxes = await store.listGmailMailboxStates();
     assert.equal(mailboxes.length, 1);
+
+    await store.appendOutboundActionRecord({
+      type: 'send',
+      reviewItemId: 'rq-1',
+      threadId: 'thread-1',
+      messageId: 'sent-1',
+      recipients: ['student@example.edu'],
+      subject: 'Re: Question',
+      recordedAt: '2026-03-22T22:05:00.000Z',
+    });
+    const outbound = await store.listOutboundActionRecords();
+    assert.equal(outbound.length, 1);
+    assert.equal(outbound[0]?.messageId, 'sent-1');
   } finally {
     await rm(root, { recursive: true, force: true });
   }

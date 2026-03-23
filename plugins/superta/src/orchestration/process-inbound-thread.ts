@@ -109,7 +109,7 @@ export async function processInboundThread(
     references: thread.references ?? [thread.messageId],
     classification,
     evidence,
-    draftSubject: `${drafted.subjectPrefix} ${thread.subject}`,
+    draftSubject: drafted.subject,
     draftBody: drafted.body,
   });
 

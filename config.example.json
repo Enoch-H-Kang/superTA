@@ -24,5 +24,10 @@
   "courseRoots": {
     "cs101-sp26": "/path/to/cs101-sp26",
     "econ201-sp26": "/path/to/econ201-sp26"
+  },
+  "notes": {
+    "classifierProvider": "Set SUPERTA_CLASSIFIER_PROVIDER=responses to use the live Responses classifier runtime path.",
+    "responsesModel": "Optional: SUPERTA_RESPONSES_MODEL=gpt-5.4-mini",
+    "responsesApiKeyEnv": "Optional: SUPERTA_RESPONSES_API_KEY_ENV=OPENAI_API_KEY"
   }
 }
