@@ -7,6 +7,35 @@
 
 It helps a professor triage course email, ground responses in local course materials, keep sensitive issues escalated, and track student requests in a structured case ledger — while keeping student-data handling in local or institution-controlled systems.
 
+## Example uses
+
+SuperTA is meant for workflows like:
+
+- **Extension requests**
+  - a student asks for more time on an assignment
+  - SuperTA routes the email to the right course
+  - checks local policy/course files
+  - creates a reviewable draft or escalates if needed
+  - records the request as a structured case
+
+- **Exam time changes**
+  - a student asks to move a midterm because of a conflict
+  - SuperTA tracks the request as an exam-time-change case
+  - preserves follow-up history across multiple emails
+  - helps the professor avoid losing track of unresolved requests
+
+- **Routine logistics questions**
+  - office hours, due dates, course procedures
+  - SuperTA uses local course materials as grounding
+  - drafts a response for review instead of improvising from nowhere
+
+- **Sensitive categories that should not be casually answered**
+  - grade-related issues
+  - accommodations
+  - integrity concerns
+  - wellbeing/safety signals
+  - these are escalated instead of treated like routine automation
+
 ## Why SuperTA exists
 
 Professor email is full of repeated, operationally important requests:
