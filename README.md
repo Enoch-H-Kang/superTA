@@ -9,32 +9,26 @@ It helps a professor triage course email, ground responses in local course mater
 
 ## Example uses
 
-SuperTA is meant for workflows like:
+SuperTA is meant to save time in ways professors actually feel:
 
-- **Extension requests**
-  - a student asks for more time on an assignment
-  - SuperTA routes the email to the right course
-  - checks local policy/course files
-  - creates a reviewable draft or escalates if needed
-  - records the request as a structured case
+- **Turn a messy course inbox into a tracked queue of student requests**
+  - extension requests, exam conflicts, and follow-ups stop living only in scattered email threads
+  - SuperTA turns them into structured cases so nothing important quietly disappears
 
-- **Exam time changes**
-  - a student asks to move a midterm because of a conflict
-  - SuperTA tracks the request as an exam-time-change case
-  - preserves follow-up history across multiple emails
-  - helps the professor avoid losing track of unresolved requests
+- **Reduce repeat work on routine course email**
+  - for deadline, logistics, and policy questions, SuperTA can ground drafts in local course files
+  - that means less rewriting the same answers over and over
 
-- **Routine logistics questions**
-  - office hours, due dates, course procedures
-  - SuperTA uses local course materials as grounding
-  - drafts a response for review instead of improvising from nowhere
+- **Keep unresolved student issues visible**
+  - when a student follows up, SuperTA can connect the new email to the existing case
+  - professors do not have to remember whether this is the third message about the same problem
 
-- **Sensitive categories that should not be casually answered**
-  - grade-related issues
-  - accommodations
-  - integrity concerns
-  - wellbeing/safety signals
-  - these are escalated instead of treated like routine automation
+- **Protect attention for the issues that actually need judgment**
+  - grade-related issues, accommodations, integrity concerns, and wellbeing/safety signals stay escalated
+  - routine operational email gets organized instead of competing for the same attention
+
+- **Give the professor a conversational control surface over course ops**
+  - instead of searching old threads manually, the professor can ask OpenClaw what is pending, what changed, and which student requests still need action
 
 ## Why SuperTA exists
 
