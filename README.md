@@ -127,6 +127,10 @@ It is ready to share publicly as an experimental project and as an OpenClaw plug
 
 ## Docs
 
+Start at:
+- `docs/README.md`
+
+Key pages:
 - `docs/getting-started.md`
 - `docs/privacy-and-deployment.md`
 - `docs/ferpa-safe-defaults.md`
