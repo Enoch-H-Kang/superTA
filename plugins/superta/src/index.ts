@@ -51,7 +51,7 @@ export { processWebhookEventIntoPipeline } from './gmail/webhook-to-pipeline.js'
 export { runLiveInboundThread } from './gmail/live-inbound-runner.js';
 export { parseGmailWebhookEnvelope } from './gmail/webhook.js';
 export { handleGmailWebhookBody } from './gmail/webhook-handler.js';
-export { draftFromReviewItem, sendApprovedReviewItem, forwardReviewThread, labelReviewThread } from './gmail/executor.js';
+export { draftFromReviewItem, forwardReviewThread, labelReviewThread } from './gmail/executor.js';
 export { registerGmailWebhookRoute } from './plugin/register-gmail-webhook.js';
 export { default as supertaPlugin } from './plugin/index.js';
 export { resolveCourseRoute } from './routing/course-resolver.js';
@@ -78,6 +78,7 @@ export { draftReply } from './drafting/draft-reply.js';
 export { createDraftEmail } from './tools/draft-email.js';
 export type { SuperTAStore } from './storage/store.js';
 export { createFileStore, defaultFileStorePaths } from './storage/file-store.js';
+export { listStudentCases, getStudentCaseWithEvents, addStudentCaseNote, mutateStudentCase } from './cases/operations.js';
 
 export function pluginEntry() {
   return {

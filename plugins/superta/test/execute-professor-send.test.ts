@@ -40,36 +40,24 @@ export async function runExecuteProfessorSendTests() {
       evidence: [],
       draftSubject: 'Re: Question',
       draftBody: 'Draft body',
+      draftSummary: 'Draft summary',
     });
     await store.saveReviewItem(pending);
 
-    const rejectPending = await executeApprovedSend(store, gmail, 'rq-pending');
-    assert.equal(rejectPending.ok, false);
+    const blockedPending = await executeApprovedSend(store, gmail, 'rq-pending');
+    assert.equal(blockedPending.ok, false);
 
     const approved = updateReviewStatus({ ...pending, id: 'rq-approved' }, 'approved');
     await store.saveReviewItem(approved);
 
-    const sent = await executeApprovedSend(store, gmail, 'rq-approved');
-    assert.equal(sent.ok, true);
-    if (sent.ok) {
-      assert.equal(sent.messageId, 'sent-1');
-      assert.deepEqual(sent.recipients, ['student@example.edu']);
-    }
+    const blockedApproved = await executeApprovedSend(store, gmail, 'rq-approved');
+    assert.equal(blockedApproved.ok, false);
+    assert.match(blockedApproved.reason, /removed/i);
 
     const loaded = await store.getReviewItem('rq-approved');
-    assert.equal(loaded?.status, 'sent');
+    assert.equal(loaded?.status, 'approved');
     const outbound = await store.listOutboundActionRecords();
-    assert.equal(outbound.length, 1);
-    assert.equal(outbound[0]?.type, 'send');
-    assert.equal(outbound[0]?.messageId, 'sent-1');
-
-    const missing = await executeApprovedSend(store, gmail, 'rq-missing');
-    assert.equal(missing.ok, false);
-
-    const noRecipients = updateReviewStatus({ ...pending, id: 'rq-noreply', replyTo: [] }, 'approved');
-    await store.saveReviewItem(noRecipients);
-    const noRecipientsResult = await executeApprovedSend(store, gmail, 'rq-noreply');
-    assert.equal(noRecipientsResult.ok, false);
+    assert.equal(outbound.length, 0);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

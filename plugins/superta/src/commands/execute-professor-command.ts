@@ -3,6 +3,7 @@ import type { SuperTAStore } from '../storage/store.js';
 import { processProfessorCommand } from '../orchestration/process-professor-command.js';
 import { executeReviewAction } from '../actions/action-executor.js';
 import { updateReviewStatus } from '../actions/review-queue.js';
+import { buildStudentCaseTransitionEvent, transitionStudentCase } from '../storage/case-ledger.js';
 import { createProposal } from '../proposals/create-proposal.js';
 
 export type ProfessorCommandExecutionResult =
@@ -49,6 +50,15 @@ export async function executeProfessorCommand(
 
     const updated = updateReviewStatus(item, 'approved');
     await store.saveReviewItem(updated);
+
+    const existingCase = await store.getStudentCase(reviewItemId);
+    if (existingCase) {
+      const transitionedCase = transitionStudentCase(existingCase, 'approved');
+      await store.saveStudentCase(transitionedCase);
+      await store.appendStudentCaseEvent(
+        buildStudentCaseTransitionEvent(transitionedCase, 'approved', 'Professor approved review item.'),
+      );
+    }
 
     return {
       type: 'approve',

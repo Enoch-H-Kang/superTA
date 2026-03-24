@@ -1,6 +1,7 @@
 import type { ReviewQueueItem } from '../actions/review-queue.js';
 import type { PipelineAuditRecord } from '../audit/schemas.js';
 import type { ProposalRecord } from '../proposals/types.js';
+import type { StudentCaseEvent, StudentCaseRecord } from './case-ledger.js';
 
 export type ReviewQueueStore = {
   saveReviewItem: (item: ReviewQueueItem) => Promise<void>;
@@ -53,10 +54,19 @@ export type OutboundActionStore = {
   listOutboundActionRecords: () => Promise<OutboundActionRecord[]>;
 };
 
+export type StudentCaseStore = {
+  saveStudentCase: (record: StudentCaseRecord) => Promise<void>;
+  getStudentCase: (id: string) => Promise<StudentCaseRecord | null>;
+  listStudentCases: () => Promise<StudentCaseRecord[]>;
+  appendStudentCaseEvent: (event: StudentCaseEvent) => Promise<void>;
+  listStudentCaseEvents: () => Promise<StudentCaseEvent[]>;
+};
+
 export type SuperTAStore =
   & ReviewQueueStore
   & AuditStore
   & ProposalStore
   & GmailWebhookCheckpointStore
   & GmailMailboxStateStore
-  & OutboundActionStore;
+  & OutboundActionStore
+  & StudentCaseStore;

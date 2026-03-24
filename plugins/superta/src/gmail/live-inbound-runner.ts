@@ -1,11 +1,14 @@
 import { resolve } from 'node:path';
 import { loadConfigFromFile } from '../config/load-config.js';
 import { resolveRuntimeClassifierConfig, createRuntimeClassifierProvider, classifyWithRuntimeFallback } from '../classifier/runtime.js';
+import { createStubClassifierProvider } from '../classifier/stub-provider.js';
 import { resolveGmailAuthConfig } from './auth-config.js';
 import { createGmailHttpClient } from './http-client.js';
 import { normalizeGmailThread } from './thread-to-normalized.js';
 import { createFileStore, defaultFileStorePaths } from '../storage/file-store.js';
 import { processInboundThreadAndStore } from '../orchestration/process-and-store.js';
+import { summarizeBlockedClassifierReason, summarizePrivacyPosture } from '../privacy.js';
+import { assertLocalModelPolicy, summarizeLocalModelPolicy } from '../local-model-policy.js';
 
 export type LiveInboundRunnerOptions = {
   configPath: string;
@@ -15,9 +18,20 @@ export type LiveInboundRunnerOptions = {
 
 export async function runLiveInboundThread(options: LiveInboundRunnerOptions) {
   const config = await loadConfigFromFile(options.configPath);
+  assertLocalModelPolicy(config.localModel);
+
   const gmailClient = createGmailHttpClient(fetch as any, resolveGmailAuthConfig());
   const store = createFileStore(defaultFileStorePaths(options.stateRoot ?? process.cwd()));
-  const classifierProvider = createRuntimeClassifierProvider(resolveRuntimeClassifierConfig(), fetch as any);
+  const runtimeClassifierConfig = resolveRuntimeClassifierConfig();
+
+  let classifierProvider;
+  let classifierPolicy = 'Classifier configuration accepted.';
+  try {
+    classifierProvider = createRuntimeClassifierProvider(runtimeClassifierConfig, fetch as any);
+  } catch (error) {
+    classifierProvider = createStubClassifierProvider();
+    classifierPolicy = `${summarizeBlockedClassifierReason(config)} Falling back to stub classifier. ${error instanceof Error ? error.message : String(error)}`;
+  }
 
   const gmailThread = await gmailClient.fetchThread(options.threadId);
   const normalized = normalizeGmailThread(gmailThread);
@@ -31,7 +45,10 @@ export async function runLiveInboundThread(options: LiveInboundRunnerOptions) {
   return {
     ok: true,
     threadId: options.threadId,
-    classifierProvider: resolveRuntimeClassifierConfig().provider,
+    classifierProvider: runtimeClassifierConfig.provider,
+    privacy: summarizePrivacyPosture(config),
+    localModel: summarizeLocalModelPolicy(config.localModel),
+    classifierPolicy,
     normalized: {
       from: normalized.from,
       to: normalized.to,

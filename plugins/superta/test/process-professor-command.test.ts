@@ -13,6 +13,17 @@ const config: SuperTAConfig = {
     courses: [],
   },
   courseRoots: {},
+  privacy: {
+    ferpaSafeMode: true,
+    allowExternalClassifier: false,
+    allowSend: false,
+    redactOperatorViews: true,
+    storeEvidenceSnippets: false,
+  },
+  localModel: {
+    required: true,
+    provider: 'stub',
+  },
 };
 
 export function runProcessProfessorCommandTests() {

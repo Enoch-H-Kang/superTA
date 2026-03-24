@@ -41,6 +41,17 @@ function buildConfig(courseRoot: string): SuperTAConfig {
     courseRoots: {
       'cs101-sp26': courseRoot,
     },
+    privacy: {
+      ferpaSafeMode: true,
+      allowExternalClassifier: false,
+      allowSend: false,
+      redactOperatorViews: true,
+      storeEvidenceSnippets: false,
+    },
+    localModel: {
+      required: true,
+      provider: 'stub',
+    },
   };
 }
 
@@ -83,11 +94,8 @@ export async function runDeadlineWorkflowTests() {
     if (result.approveResult.type === 'approve') {
       assert.equal(result.approveResult.ok, true);
     }
-    assert.equal(result.sendResult?.type, 'send');
-    assert.equal(result.sendResult?.ok, true);
-
     const savedItem = await store.getReviewItem(result.queuedReviewItemId ?? '');
-    assert.equal(savedItem?.status, 'sent');
+    assert.equal(savedItem?.status, 'approved');
 
     const audits = await store.listAuditRecords();
     assert.equal(audits.length, 1);

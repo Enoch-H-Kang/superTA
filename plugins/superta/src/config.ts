@@ -8,6 +8,18 @@ export type SuperTAConfig = {
   };
   routing: CourseRouteConfig;
   courseRoots: Record<string, string>;
+  privacy: {
+    ferpaSafeMode: boolean;
+    allowExternalClassifier: boolean;
+    allowSend: boolean;
+    redactOperatorViews: boolean;
+    storeEvidenceSnippets: boolean;
+  };
+  localModel: {
+    required: boolean;
+    provider: 'stub' | 'ollama' | 'lm-studio' | 'vllm' | 'custom-local';
+    endpoint?: string;
+  };
 };
 
 export const defaultConfig: SuperTAConfig = {
@@ -29,6 +41,17 @@ export const defaultConfig: SuperTAConfig = {
   },
   courseRoots: {
     'cs101-sp26': '/tmp/cs101-sp26',
+  },
+  privacy: {
+    ferpaSafeMode: true,
+    allowExternalClassifier: false,
+    allowSend: false,
+    redactOperatorViews: true,
+    storeEvidenceSnippets: false,
+  },
+  localModel: {
+    required: true,
+    provider: 'stub',
   },
 };
 

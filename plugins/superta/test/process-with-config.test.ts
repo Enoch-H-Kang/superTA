@@ -68,6 +68,17 @@ export async function runProcessWithConfigTests() {
     courseRoots: {
       'econ201-sp26': econRoot,
     },
+    privacy: {
+      ferpaSafeMode: true,
+      allowExternalClassifier: false,
+      allowSend: false,
+      redactOperatorViews: true,
+      storeEvidenceSnippets: false,
+    },
+    localModel: {
+      required: true,
+      provider: 'stub',
+    },
   };
 
   try {

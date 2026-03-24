@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createMockGmailClient } from '../src/gmail/client.js';
-import { draftFromReviewItem, forwardReviewThread, labelReviewThread, sendApprovedReviewItem } from '../src/gmail/executor.js';
-import { createReviewQueueItem, updateReviewStatus } from '../src/actions/review-queue.js';
+import { draftFromReviewItem, forwardReviewThread, labelReviewThread } from '../src/gmail/executor.js';
+import { createReviewQueueItem } from '../src/actions/review-queue.js';
 import type { Classification } from '../src/routing/classify.js';
 
 function classification(): Classification {
@@ -30,6 +30,7 @@ function baseItem() {
     evidence: [],
     draftSubject: 'Re: Question',
     draftBody: 'Draft body',
+      draftSummary: 'Draft summary',
   });
 }
 
@@ -42,12 +43,6 @@ export async function runGmailExecutorTests() {
 
   const drafted = await draftFromReviewItem(client, pending);
   assert.equal(drafted.status, 'drafted');
-
-  await assert.rejects(() => sendApprovedReviewItem(client, pending, ['student@example.edu']), /Only approved review items/);
-
-  const approved = updateReviewStatus(pending, 'approved');
-  const sent = await sendApprovedReviewItem(client, approved, ['student@example.edu', 'prof@example.edu']);
-  assert.equal(sent.status, 'sent');
 
   const forwarded = await forwardReviewThread(client, pending, ['prof@example.edu'], 'Please review');
   assert.equal(forwarded.status, 'forwarded');

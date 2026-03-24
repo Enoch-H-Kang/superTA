@@ -72,6 +72,17 @@ export async function runProcessAndStoreTests() {
     courseRoots: {
       'cs101-sp26': courseRoot,
     },
+    privacy: {
+      ferpaSafeMode: true,
+      allowExternalClassifier: false,
+      allowSend: false,
+      redactOperatorViews: true,
+      storeEvidenceSnippets: false,
+    },
+    localModel: {
+      required: true,
+      provider: 'stub',
+    },
   };
 
   try {
@@ -82,20 +93,56 @@ export async function runProcessAndStoreTests() {
 
     const reviewItems = await store.listReviewItems();
     const auditRecords = await store.listAuditRecords();
+    const studentCases = await store.listStudentCases();
+    const studentCaseEvents = await store.listStudentCaseEvents();
     assert.equal(reviewItems.length, 1);
     assert.equal(auditRecords.length, 1);
+    assert.equal(studentCases.length, 1);
+    assert.equal(studentCaseEvents.length, 1);
+    assert.equal(studentCases[0]?.caseType, 'extension-request');
+    assert.equal(studentCases[0]?.student.key, 'student@example.edu');
+    assert.equal(studentCases[0]?.status, 'queued');
+    assert.equal(reviewItems[0]?.draftSummary.length ? true : false, true);
     assert.equal(auditRecords[0]?.outcome, 'queue');
 
-    const escalated = await processInboundThreadAndStore(config, store, thread(), {
-      classify: () => classification({ category: 'grade-related', action: 'draft_for_professor' }),
-    });
+    const escalated = await processInboundThreadAndStore(
+      config,
+      store,
+      thread({
+        messageId: 'msg-2',
+        subject: 'Question about my grade',
+        bodyText: 'I think my midterm grade was entered incorrectly.',
+      }),
+      {
+        classify: () => classification({ category: 'grade-related', action: 'draft_for_professor' }),
+      },
+    );
     assert.equal(escalated.outcome.type, 'escalate');
 
     const reviewItemsAfterEscalation = await store.listReviewItems();
     const auditRecordsAfterEscalation = await store.listAuditRecords();
+    const studentCasesAfterEscalation = await store.listStudentCases();
+    const studentCaseEventsAfterEscalation = await store.listStudentCaseEvents();
     assert.equal(reviewItemsAfterEscalation.length, 1);
     assert.equal(auditRecordsAfterEscalation.length, 2);
+    assert.equal(studentCasesAfterEscalation.length, 2);
+    assert.equal(studentCaseEventsAfterEscalation.length, 2);
+    assert.equal(studentCasesAfterEscalation[1]?.status, 'escalated');
+    assert.equal(studentCasesAfterEscalation[1]?.sensitivity, 'sensitive');
     assert.equal(auditRecordsAfterEscalation[1]?.outcome, 'escalate');
+
+    const merged = await processInboundThreadAndStore(config, store, thread({ messageId: 'msg-3', subject: 'Another late policy question' }), {
+      classify: () => classification(),
+    });
+    assert.equal(merged.outcome.type, 'queue');
+
+    const studentCasesAfterMerge = await store.listStudentCases();
+    const studentCaseEventsAfterMerge = await store.listStudentCaseEvents();
+    const mergedExtensionCase = studentCasesAfterMerge.find((item) => item.caseType === 'extension-request');
+    assert.equal(studentCasesAfterMerge.length, 2);
+    assert.equal(studentCaseEventsAfterMerge.length, 3);
+    assert.equal(mergedExtensionCase?.messageId, 'msg-3');
+    assert.equal(studentCaseEventsAfterMerge[2]?.type, 'merged_followup');
   } finally {
     await rm(courseRoot, { recursive: true, force: true });
     await rm(stateRoot, { recursive: true, force: true });

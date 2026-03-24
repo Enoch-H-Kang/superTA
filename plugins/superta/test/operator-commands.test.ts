@@ -40,6 +40,7 @@ export async function runOperatorCommandTests() {
       evidence: [],
       draftSubject: 'Re: Question',
       draftBody: 'Draft body',
+      draftSummary: 'Draft summary',
     });
     const approved = updateReviewStatus({ ...pending, id: 'rq-2' }, 'approved');
     await store.saveReviewItem(pending);

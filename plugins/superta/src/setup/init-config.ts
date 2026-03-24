@@ -21,6 +21,17 @@ export async function initSuperTAConfig(options: InitConfigOptions) {
       courses: [],
     },
     courseRoots: {},
+    privacy: {
+      ferpaSafeMode: true,
+      allowExternalClassifier: false,
+      allowSend: false,
+      redactOperatorViews: true,
+      storeEvidenceSnippets: false,
+    },
+    localModel: {
+      required: true,
+      provider: 'stub',
+    },
   };
 
   const path = resolve(options.configPath);

@@ -80,6 +80,17 @@ async function baseSetup() {
       'cs101-sp26': courseRoot,
       'econ201-sp26': courseRoot,
     },
+    privacy: {
+      ferpaSafeMode: true,
+      allowExternalClassifier: false,
+      allowSend: false,
+      redactOperatorViews: true,
+      storeEvidenceSnippets: false,
+    },
+    localModel: {
+      required: true,
+      provider: 'stub',
+    },
   };
 
   return { courseRoot, stateRoot, store, config };

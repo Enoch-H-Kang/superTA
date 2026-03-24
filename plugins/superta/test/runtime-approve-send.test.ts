@@ -38,6 +38,13 @@ export async function runRuntimeApproveSendTests() {
           courses: [],
         },
         courseRoots: {},
+        privacy: {
+          ferpaSafeMode: true,
+          allowExternalClassifier: false,
+          allowSend: false,
+          redactOperatorViews: true,
+          storeEvidenceSnippets: false,
+        },
       }),
     );
 
@@ -55,55 +62,24 @@ export async function runRuntimeApproveSendTests() {
         evidence: [],
         draftSubject: 'Re: Question',
         draftBody: 'Draft body',
+      draftSummary: 'Draft summary',
       }),
     );
 
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async (url: string) => {
-      if (String(url).includes('/users/me/messages/send')) {
-        return {
-          ok: true,
-          status: 200,
-          async text() {
-            return JSON.stringify({ id: 'sent-live-1' });
-          },
-        } as any;
-      }
+    const result = await runRuntimeApproveSend({
+      configPath,
+      stateRoot: root,
+      sender: 'prof@example.edu',
+      reviewItemId: 'rq-1',
+    });
 
-      return {
-        ok: true,
-        status: 200,
-        async text() {
-          return '{}';
-        },
-      } as any;
-    }) as any;
+    assert.equal(result.ok, true);
+    assert.equal(result.step, 'approve');
 
-    try {
-      process.env.GMAIL_ACCESS_TOKEN = 'token';
-      const result = await runRuntimeApproveSend({
-        configPath,
-        stateRoot: root,
-        sender: 'prof@example.edu',
-        reviewItemId: 'rq-1',
-        mode: 'approve-and-send',
-      });
-
-      assert.equal(result.ok, true);
-      if (result.ok && result.step === 'send') {
-        assert.equal(result.messageId, 'sent-live-1');
-        assert.deepEqual(result.recipients, ['student@example.edu']);
-      }
-
-      const stored = await store.getReviewItem('rq-1');
-      assert.equal(stored?.status, 'sent');
-      const outbound = await store.listOutboundActionRecords();
-      assert.equal(outbound.length, 1);
-      assert.equal(outbound[0]?.messageId, 'sent-live-1');
-    } finally {
-      globalThis.fetch = originalFetch;
-      delete process.env.GMAIL_ACCESS_TOKEN;
-    }
+    const stored = await store.getReviewItem('rq-1');
+    assert.equal(stored?.status, 'approved');
+    const outbound = await store.listOutboundActionRecords();
+    assert.equal(outbound.length, 0);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

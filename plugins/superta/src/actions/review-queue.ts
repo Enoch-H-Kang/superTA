@@ -15,6 +15,7 @@ export type ReviewQueueItem = {
   evidence: EvidenceItem[];
   draftSubject: string;
   draftBody: string;
+  draftSummary: string;
   status: ReviewStatus;
 };
 

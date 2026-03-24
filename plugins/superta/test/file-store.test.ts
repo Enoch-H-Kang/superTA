@@ -48,6 +48,7 @@ export async function runFileStoreTests() {
       evidence: [],
       draftSubject: 'Re: Question',
       draftBody: 'Draft body',
+      draftSummary: 'Draft summary',
     });
 
     await store.saveReviewItem(reviewItem);

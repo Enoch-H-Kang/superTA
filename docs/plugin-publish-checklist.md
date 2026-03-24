@@ -12,7 +12,7 @@ Use this checklist before publishing SuperTA publicly as an OpenClaw plugin.
 - [ ] default docs do **not** require OpenAI/API keys
 - [ ] interactive setup works without extra model API
 - [ ] doctor report works without extra model API
-- [ ] README clearly says model-backed classification is optional
+- [ ] README clearly says the supported workflow does not use external model-backed classification
 
 ## Setup/onboarding
 - [ ] interactive setup path works

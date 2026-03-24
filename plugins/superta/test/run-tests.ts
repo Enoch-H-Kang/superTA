@@ -56,6 +56,10 @@ import { runProcessWithConfigTests } from './process-with-config.test.js';
 import { runProcessAndStoreTests } from './process-and-store.test.js';
 import { runProcessWithClassifierTests } from './process-with-classifier.test.js';
 import { runLiveInboundRunnerTests } from './live-inbound-runner.test.js';
+import { runPluginEntryTests } from './plugin-entry.test.js';
+import { runPluginSmokeTests } from './plugin-smoke.test.js';
+import { runLocalModelPolicyTests } from './local-model-policy.test.js';
+import { runCaseOperationsTests } from './case-operations.test.js';
 
 async function main() {
   runConfigTests();
@@ -118,11 +122,9 @@ async function main() {
   await runLiveInboundRunnerTests();
   await runPluginEntryTests();
   await runPluginSmokeTests();
+  await runLocalModelPolicyTests();
+  await runCaseOperationsTests();
   console.log('plugin tests passed');
-}
-
-await main();
-sts passed');
 }
 
 await main();

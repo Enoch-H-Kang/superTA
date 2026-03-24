@@ -46,6 +46,17 @@ export async function runLiveInboundRunnerTests() {
     courseRoots: {
       'cs101-sp26': courseRoot,
     },
+    privacy: {
+      ferpaSafeMode: true,
+      allowExternalClassifier: false,
+      allowSend: false,
+      redactOperatorViews: true,
+      storeEvidenceSnippets: false,
+    },
+    localModel: {
+      required: true,
+      provider: 'stub',
+    },
   };
 
   const thread: GmailThreadMessage[] = [

@@ -28,6 +28,7 @@ export function runReviewQueueTests() {
     evidence: [],
     draftSubject: 'Re: Question',
     draftBody: 'Draft body',
+    draftSummary: 'Draft summary',
   });
 
   assert.equal(item.status, 'pending');

@@ -25,9 +25,21 @@
     "cs101-sp26": "/path/to/cs101-sp26",
     "econ201-sp26": "/path/to/econ201-sp26"
   },
+  "privacy": {
+    "ferpaSafeMode": true,
+    "allowExternalClassifier": false,
+    "allowSend": false,
+    "redactOperatorViews": true,
+    "storeEvidenceSnippets": false
+  },
+  "localModel": {
+    "required": true,
+    "provider": "ollama",
+    "endpoint": "http://127.0.0.1:11434"
+  },
   "notes": {
-    "classifierProvider": "Set SUPERTA_CLASSIFIER_PROVIDER=responses to use the live Responses classifier runtime path.",
-    "responsesModel": "Optional: SUPERTA_RESPONSES_MODEL=gpt-5.4-mini",
-    "responsesApiKeyEnv": "Optional: SUPERTA_RESPONSES_API_KEY_ENV=OPENAI_API_KEY"
+    "classifierProvider": "FERPA-safe supported workflow uses local deterministic logic or a local model endpoint only.",
+    "sendPolicy": "FERPA-safe workflow is draft/review only. Create drafts and have the professor send manually from Gmail.",
+    "localModelPolicy": "SuperTA refuses non-local model endpoints for email workflows. Use localhost/private endpoints only."
   }
 }

@@ -33,15 +33,15 @@ node dist/plugins/superta/src/gmail/live-inbound-runner.js <threadId> local.conf
 
 If you do not have live Gmail handy, explain the expected outcome instead and use fixture/demo paths.
 
-### 4) Create a draft or approve/send
-Draft path:
+### 4) Approve and create a draft
+Approve the queued item:
 ```bash
-node dist/plugins/superta/src/commands/runtime-draft-send.js <reviewItemId> .
+node dist/plugins/superta/src/commands/runtime-approve-send.js <reviewItemId> prof@example.edu local.config.json .
 ```
 
-Approve/send path:
+Then create the Gmail draft:
 ```bash
-node dist/plugins/superta/src/commands/runtime-approve-send.js <reviewItemId> prof@example.edu approve-and-send local.config.json .
+node dist/plugins/superta/src/commands/runtime-draft-send.js <reviewItemId> .
 ```
 
 ### 5) Inspect resulting state
@@ -71,3 +71,4 @@ Avoid implying:
 - production-ready Pub/Sub/webhook operations
 - fully hardened live classifier behavior
 - broad non-technical plug-and-play readiness
+ss

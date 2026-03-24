@@ -12,36 +12,34 @@ Use this checklist immediately before publicly announcing SuperTA.
 - [ ] follow only `README.md` + `docs/getting-started.md`
 - [ ] complete `interactive-setup.js`
 - [ ] run `doctor-report.js`
-- [ ] list configured courses
 - [ ] inspect state
 - [ ] note any confusing wording or rough edges and fix them first
 
 ## Messaging alignment
 - [ ] describe SuperTA as an **experimental OpenClaw plugin**
-- [ ] say **no extra model API required by default**
-- [ ] say **one professor across multiple live courses**
-- [ ] say **draft-first / human-in-the-loop**
-- [ ] do **not** call it a polished production product
-- [ ] do **not** imply turnkey Gmail production deployment
+- [ ] say student-data handling stays **local or institution-controlled**
+- [ ] say the supported workflow uses **local models or deterministic logic only**
+- [ ] say there is **no supported external API path** for student-data processing
+- [ ] say **draft/review/manual-send**
+- [ ] say **structured student case tracking**
+- [ ] do **not** call it a managed production SaaS
 - [ ] do **not** imply autonomous grading/accommodation/integrity decisions
+- [ ] do **not** overclaim legal certification
 
 ## Demo readiness
-- [ ] rehearse the 5-minute demo once
-- [ ] decide whether to use live Gmail or safer local/demo paths
+- [ ] use synthetic or clearly safe demo data
 - [ ] verify the commands in `docs/public-demo-walkthrough.md`
 - [ ] verify the commands in `docs/demo-script.md`
 
-## Docs to link in the announcement
+## Docs to link
 - [ ] `README.md`
 - [ ] `docs/getting-started.md`
-- [ ] `docs/public-demo-walkthrough.md`
+- [ ] `docs/privacy-and-deployment.md`
 - [ ] `docs/release-readiness.md`
 
 ## Final release call
-If any of these are false, delay announcement:
+Delay announcement if any of these are false:
 - setup is understandable
-- doctor output is understandable
-- plugin smoke test passes
-- safety evals pass
+- privacy boundary is understandable
 - caveats are explicit
-- public framing is honest
+- messaging matches current code and docs

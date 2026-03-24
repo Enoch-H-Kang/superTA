@@ -6,9 +6,12 @@ import { createReviewQueueItem } from '../actions/review-queue.js';
 import { logAudit } from '../audit/logger.js';
 import { draftReply } from '../drafting/draft-reply.js';
 import type { Classification } from '../routing/classify.js';
+import type { SuperTAConfig } from '../config.js';
+import { redactEvidence } from '../privacy.js';
 
 export type ProcessInboundOptions = {
   routeConfig?: CourseRouteConfig;
+  privacy?: SuperTAConfig['privacy'];
   classify?: (input: {
     thread: NormalizedThread;
     courseId?: string;
@@ -49,6 +52,7 @@ export async function processInboundThread(
   const classify = options.classify ?? fallbackClassifier;
   const initialClassification = await classify({ thread, courseId: route.courseId });
   const classification = applyPolicy(route, initialClassification, evidence);
+  const persistedEvidence = options.privacy?.storeEvidenceSnippets === false ? redactEvidence(evidence) : evidence;
 
   if (classification.action === 'escalate_now') {
     const audit = logAudit({
@@ -57,7 +61,7 @@ export async function processInboundThread(
       courseId: route.courseId,
       route,
       classification,
-      evidence,
+      evidence: persistedEvidence,
       outcome: 'escalate',
       outcomeReason: classification.reason,
     }).record;
@@ -78,7 +82,7 @@ export async function processInboundThread(
       courseId: route.courseId,
       route,
       classification,
-      evidence,
+      evidence: persistedEvidence,
       outcome: 'needs_more_info',
       outcomeReason: classification.reason,
     }).record;
@@ -108,9 +112,10 @@ export async function processInboundThread(
     inReplyTo: thread.inReplyTo ?? thread.messageId,
     references: thread.references ?? [thread.messageId],
     classification,
-    evidence,
+    evidence: persistedEvidence,
     draftSubject: drafted.subject,
     draftBody: drafted.body,
+    draftSummary: drafted.summary,
   });
 
   const audit = logAudit({
@@ -119,7 +124,7 @@ export async function processInboundThread(
     courseId: route.courseId,
     route,
     classification,
-    evidence,
+    evidence: persistedEvidence,
     outcome: 'queue',
     outcomeReason: 'Queued for professor review.',
   }).record;

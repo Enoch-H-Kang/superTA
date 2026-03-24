@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import type { PipelineAuditRecord } from '../audit/schemas.js';
 import type { ReviewQueueItem } from '../actions/review-queue.js';
 import type { ProposalRecord } from '../proposals/types.js';
+import type { StudentCaseEvent, StudentCaseRecord } from './case-ledger.js';
 import type { GmailMailboxState, OutboundActionRecord, SuperTAStore } from './store.js';
 
 async function ensureParent(path: string) {
@@ -30,6 +31,8 @@ export type FileStorePaths = {
   gmailCheckpointPath: string;
   gmailMailboxStatePath: string;
   outboundActionsPath: string;
+  studentCasesPath: string;
+  studentCaseEventsPath: string;
 };
 
 export function createFileStore(paths: FileStorePaths): SuperTAStore {
@@ -118,6 +121,32 @@ export function createFileStore(paths: FileStorePaths): SuperTAStore {
     async listOutboundActionRecords() {
       return readJsonFile<OutboundActionRecord[]>(paths.outboundActionsPath, []);
     },
+
+    async saveStudentCase(record: StudentCaseRecord) {
+      const records = await readJsonFile<StudentCaseRecord[]>(paths.studentCasesPath, []);
+      const next = records.filter((existing) => existing.id !== record.id);
+      next.push(record);
+      await writeJsonFile(paths.studentCasesPath, next);
+    },
+
+    async getStudentCase(id: string) {
+      const records = await readJsonFile<StudentCaseRecord[]>(paths.studentCasesPath, []);
+      return records.find((record) => record.id === id) ?? null;
+    },
+
+    async listStudentCases() {
+      return readJsonFile<StudentCaseRecord[]>(paths.studentCasesPath, []);
+    },
+
+    async appendStudentCaseEvent(event: StudentCaseEvent) {
+      const events = await readJsonFile<StudentCaseEvent[]>(paths.studentCaseEventsPath, []);
+      events.push(event);
+      await writeJsonFile(paths.studentCaseEventsPath, events);
+    },
+
+    async listStudentCaseEvents() {
+      return readJsonFile<StudentCaseEvent[]>(paths.studentCaseEventsPath, []);
+    },
   };
 }
 
@@ -129,5 +158,7 @@ export function defaultFileStorePaths(root: string): FileStorePaths {
     gmailCheckpointPath: join(root, 'state', 'gmail-checkpoints.json'),
     gmailMailboxStatePath: join(root, 'state', 'gmail-mailboxes.json'),
     outboundActionsPath: join(root, 'state', 'outbound-actions.json'),
+    studentCasesPath: join(root, 'state', 'student-cases.json'),
+    studentCaseEventsPath: join(root, 'state', 'student-case-events.json'),
   };
 }

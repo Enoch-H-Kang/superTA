@@ -5,12 +5,8 @@ import { join } from 'node:path';
 import { createFileStore, defaultFileStorePaths } from '../src/storage/file-store.js';
 import { processInboundThreadWithClassifier } from '../src/orchestration/process-with-classifier.js';
 import { createStubClassifierProvider } from '../src/classifier/stub-provider.js';
-import { createResponsesClassifierProvider } from '../src/classifier/responses-adapter.js';
-import { createMockResponsesClient } from '../src/classifier/mock-responses-client.js';
-import { createResponsesHttpClient } from '../src/classifier/responses-http-client.js';
 import type { NormalizedThread } from '../src/gmail/normalize.js';
 import type { SuperTAConfig } from '../src/config.js';
-import type { Classification } from '../src/routing/classify.js';
 
 function thread(subject: string): NormalizedThread {
   return {
@@ -22,19 +18,6 @@ function thread(subject: string): NormalizedThread {
     bodyText: 'Body',
     attachments: [],
     isProfessorCommand: false,
-  };
-}
-
-function responsesClassification(): Classification {
-  return {
-    category: 'deadline',
-    action: 'draft_for_professor',
-    confidence: 0.95,
-    riskTier: 1,
-    requiredSources: ['policy'],
-    shouldUpdateFaq: false,
-    shouldNotifyProfessor: false,
-    reason: 'Responses adapter mock result.',
   };
 }
 
@@ -75,6 +58,17 @@ export async function runProcessWithClassifierTests() {
     courseRoots: {
       'cs101-sp26': courseRoot,
     },
+    privacy: {
+      ferpaSafeMode: true,
+      allowExternalClassifier: false,
+      allowSend: false,
+      redactOperatorViews: true,
+      storeEvidenceSnippets: false,
+    },
+    localModel: {
+      required: true,
+      provider: 'stub',
+    },
   };
 
   try {
@@ -84,49 +78,16 @@ export async function runProcessWithClassifierTests() {
     const escalated = await processInboundThreadWithClassifier(config, store, classifier, thread('Question about my grade'));
     assert.equal(escalated.outcome.type, 'escalate');
 
-    const responsesProvider = createResponsesClassifierProvider(
-      {
-        model: 'gpt-5.4-mini',
-        systemPrompt: 'Classify course email into the SuperTA schema.',
-      },
-      createMockResponsesClient(responsesClassification()),
-    );
-
-    const queuedViaResponses = await processInboundThreadWithClassifier(
+    const secondQueued = await processInboundThreadWithClassifier(
       config,
       store,
-      responsesProvider,
+      classifier,
       thread('Need help with late submission'),
     );
-    assert.equal(queuedViaResponses.outcome.type, 'queue');
-    assert.equal(queuedViaResponses.classification.confidence, 0.95);
-
-    process.env.OPENAI_API_KEY = 'test-key';
-    const httpProvider = createResponsesClassifierProvider(
-      {
-        model: 'gpt-5.4-mini',
-        systemPrompt: 'Classify course email into the SuperTA schema.',
-      },
-      createResponsesHttpClient(async () => ({
-        ok: true,
-        status: 200,
-        async text() {
-          return JSON.stringify(responsesClassification());
-        },
-      })),
-    );
-
-    const queuedViaHttp = await processInboundThreadWithClassifier(
-      config,
-      store,
-      httpProvider,
-      thread('Need extension help'),
-    );
-    assert.equal(queuedViaHttp.outcome.type, 'queue');
-    assert.equal(queuedViaHttp.classification.confidence, 0.95);
+    assert.equal(secondQueued.outcome.type, 'queue');
 
     const storedAudits = await store.listAuditRecords();
-    assert.equal(storedAudits.length, 4);
+    assert.equal(storedAudits.length, 3);
   } finally {
     await rm(courseRoot, { recursive: true, force: true });
     await rm(stateRoot, { recursive: true, force: true });

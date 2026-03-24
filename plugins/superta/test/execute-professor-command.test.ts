@@ -19,6 +19,17 @@ const config: SuperTAConfig = {
     courses: [],
   },
   courseRoots: {},
+  privacy: {
+    ferpaSafeMode: true,
+    allowExternalClassifier: false,
+    allowSend: false,
+    redactOperatorViews: true,
+    storeEvidenceSnippets: false,
+  },
+  localModel: {
+    required: true,
+    provider: 'stub',
+  },
 };
 
 function classification(): Classification {
@@ -51,8 +62,33 @@ export async function runExecuteProfessorCommandTests() {
       evidence: [],
       draftSubject: 'Re: Question',
       draftBody: 'Draft body',
+      draftSummary: 'Draft summary',
     });
     await store.saveReviewItem(item);
+    await store.saveStudentCase({
+      id: 'rq-1',
+      threadId: 'thread-1',
+      messageId: 'msg-1',
+      courseId: 'cs101-sp26',
+      student: {
+        key: 'student@example.edu',
+        primaryEmail: 'student@example.edu',
+        displayName: 'student@example.edu',
+        observedEmails: ['student@example.edu'],
+      },
+      subject: 'Question',
+      caseType: 'extension-request',
+      category: 'deadline',
+      sensitivity: 'routine',
+      status: 'queued',
+      requestSummary: 'Can I submit late?',
+      requestedAt: '2026-03-24T00:00:00.000Z',
+      updatedAt: '2026-03-24T00:00:00.000Z',
+      source: {
+        threadId: 'thread-1',
+        messageId: 'msg-1',
+      },
+    });
 
     const approved = await executeProfessorCommand(config, store, 'prof@example.edu', '[SUPERTA APPROVE] rq-1');
     assert.equal(approved.type, 'approve');

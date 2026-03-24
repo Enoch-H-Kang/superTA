@@ -92,7 +92,8 @@ export async function runProcessInboundThreadTests() {
       assert.deepEqual(queued.outcome.item.references, ['orig-message-id']);
       assert.match(queued.outcome.item.draftSubject, /^Re:/);
       assert.match(queued.outcome.item.draftBody, /Course: cs101-sp26/);
-      assert.match(queued.outcome.item.draftBody, /Grounding evidence:/);
+      assert.match(queued.outcome.item.draftBody, /Grounding sources:/);
+      assert.ok(queued.outcome.item.draftSummary.length > 0);
     }
 
     const econQueued = await processInboundThread(

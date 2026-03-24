@@ -2,6 +2,13 @@ import type { NormalizedThread } from '../gmail/normalize.js';
 import type { SuperTAConfig } from '../config.js';
 import type { Classification } from '../routing/classify.js';
 import type { SuperTAStore } from '../storage/store.js';
+import {
+  buildStudentCaseEvent,
+  buildStudentCaseMergedEvent,
+  buildStudentCaseRecord,
+  isOpenStudentCase,
+  mergeStudentCaseRecord,
+} from '../storage/case-ledger.js';
 import { processInboundThreadWithConfig } from './process-with-config.js';
 
 export async function processInboundThreadAndStore(
@@ -27,6 +34,28 @@ export async function processInboundThreadAndStore(
 
   if (result.outcome.type === 'queue') {
     await store.saveReviewItem(result.outcome.item);
+  }
+
+  const incomingStudentCase = buildStudentCaseRecord(thread, result);
+  const existingCases = await store.listStudentCases();
+  const matchedOpenCase = existingCases.find(
+    (record) =>
+      isOpenStudentCase(record)
+      && record.courseId === incomingStudentCase.courseId
+      && record.caseType === incomingStudentCase.caseType
+      && record.student.key === incomingStudentCase.student.key,
+  );
+
+  if (matchedOpenCase) {
+    const mergedCase = mergeStudentCaseRecord(matchedOpenCase, incomingStudentCase);
+    await store.saveStudentCase(mergedCase);
+    await store.appendStudentCaseEvent(
+      buildStudentCaseMergedEvent(mergedCase, 'Merged follow-up email into existing open case.'),
+    );
+  } else {
+    const studentCaseEvent = buildStudentCaseEvent(incomingStudentCase, result);
+    await store.saveStudentCase(incomingStudentCase);
+    await store.appendStudentCaseEvent(studentCaseEvent);
   }
 
   return result;

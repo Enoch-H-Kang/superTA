@@ -4,55 +4,44 @@
 
 SuperTA is ready to present as a:
 - **public GitHub project**
-- **OpenClaw plugin prototype**
-- **developer preview / technical early-adopter tool**
+- **OpenClaw plugin prototype / developer preview**
+- **privacy-conscious professor email operations tool**
 
-## Default release story
+## Recommended public story
 
-The default public story should be:
+The public story should be:
 - SuperTA is an **OpenClaw plugin**
 - it is **Gmail-backed**
-- it uses **local course files** and **deterministic policy logic**
-- it is **draft-first** and **human-in-the-loop**
-- it does **not require any extra model API** for the core install story
-
-## Optional advanced story
-
-An experimental Responses/OpenAI-backed classifier path exists, but it should be presented as:
-- optional
-- advanced
-- not required for the core plugin promise
+- it uses **local course files**
+- it keeps student-data handling **local or institution-controlled**
+- it supports **local-model or deterministic-only** processing
+- it is **draft/review/manual-send**
+- it tracks student requests through a **structured case ledger**
 
 ## Strong points
 
-- plugin boundary is explicit
-- setup/onboarding is much better than before
-- doctor and inspection commands exist
-- Gmail plumbing is real enough for credible technical use
-- safety evals and classifier fixture evals exist
-- operator visibility is much better than before
+- privacy-conscious architecture story is much clearer
+- local-model policy boundary exists
+- runtime send is removed from the supported workflow
+- structured student case tracking exists
+- case dedup/linking exists
+- internal case operations API exists for OpenClaw-driven conversational flows
+- setup/onboarding is credible
+- tests/evals are real
 
 ## Remaining caveats
 
-### 1. Gmail inbound ops are not turnkey production infrastructure
-Still missing:
-- managed Pub/Sub IAM provisioning
-- fully hosted webhook deployment story
-- automated watch-renewal scheduling/orchestration
+### 1. Still a prototype/developer preview
+This is not yet a polished managed product.
 
-### 2. Production support posture is still prototype-grade
-Still missing:
-- polished packaging/release flow
-- stronger deployment automation
-- broader production hardening
+### 2. Gmail inbound ops still require operator competence
+Webhook reachability, auth, and watch lifecycle still need competent setup.
 
-### 3. Optional live classifier hardening is still incomplete
-Still missing:
-- more live mismatch review
-- more prompt hardening on tricky cases
+### 3. Legal/compliance language should stay careful
+Do not overclaim legal certification.
 
 ## Public wording recommendation
 
-Reasonable public language:
+Reasonable public wording:
 
-> SuperTA is an experimental Gmail-backed OpenClaw plugin for one professor across multiple live courses. It supports local-file grounding, deterministic safety controls, multi-course onboarding, Gmail integration plumbing, and human-in-the-loop draft/review workflows. No extra model API is required for the default setup. Optional advanced model-backed classification exists for experimentation.
+> SuperTA is an experimental OpenClaw plugin for professor email workflows across multiple courses. It keeps student-data handling in local or institution-controlled systems, uses local models or deterministic logic instead of hosted external APIs, supports draft/review/manual-send workflows, and maintains structured student case records for operational follow-through.

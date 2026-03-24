@@ -38,6 +38,7 @@ export async function runRuntimeDraftSendTests() {
         evidence: [],
         draftSubject: 'Re: Question',
         draftBody: 'Draft body',
+      draftSummary: 'Draft summary',
       }),
     );
 

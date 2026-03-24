@@ -16,64 +16,15 @@ const input = {
 };
 
 export async function runRuntimeClassifierTests() {
-  const stubConfig = resolveRuntimeClassifierConfig({});
-  assert.equal(stubConfig.provider, 'stub');
-
-  const responsesConfig = resolveRuntimeClassifierConfig({
+  const runtimeConfig = resolveRuntimeClassifierConfig({
     SUPERTA_CLASSIFIER_PROVIDER: 'responses',
-    SUPERTA_RESPONSES_MODEL: 'gpt-5.4-mini',
-    SUPERTA_RESPONSES_SYSTEM_PROMPT: 'Classify email.',
-    SUPERTA_RESPONSES_API_KEY_ENV: 'OPENAI_API_KEY',
-    SUPERTA_RESPONSES_ENDPOINT: 'https://api.openai.com/v1/responses',
+    OPENAI_API_KEY: 'should-be-ignored',
   });
-  assert.equal(responsesConfig.provider, 'responses');
-  assert.equal(responsesConfig.responses?.model, 'gpt-5.4-mini');
+  assert.equal(runtimeConfig.provider, 'stub');
 
-  const stubProvider = createRuntimeClassifierProvider({ provider: 'stub' });
+  const stubProvider = createRuntimeClassifierProvider(runtimeConfig);
   const stubResult = await stubProvider.classify(input);
   assert.equal(stubResult.category, 'deadline');
-
-  process.env.OPENAI_API_KEY = 'test-key';
-  const responsesProvider = createRuntimeClassifierProvider(
-    {
-      provider: 'responses',
-      responses: {
-        model: 'gpt-5.4-mini',
-        systemPrompt: 'Classify email.',
-        apiKeyEnvVar: 'OPENAI_API_KEY',
-        endpoint: 'https://api.openai.com/v1/responses',
-      },
-    },
-    (async () => ({
-      ok: true,
-      status: 200,
-      async text() {
-        return JSON.stringify({
-          output: [
-            {
-              content: [
-                {
-                  text: JSON.stringify({
-                    category: 'deadline',
-                    action: 'draft_for_professor',
-                    confidence: 0.91,
-                    riskTier: 1,
-                    requiredSources: ['policy'],
-                    shouldUpdateFaq: false,
-                    shouldNotifyProfessor: false,
-                    reason: 'Runtime Responses classification.',
-                  }),
-                },
-              ],
-            },
-          ],
-        });
-      },
-    })) as any,
-  );
-
-  const responsesResult = await responsesProvider.classify(input);
-  assert.equal(responsesResult.confidence, 0.91);
 
   const failedClosed = await classifyWithRuntimeFallback(
     { classify: async () => { throw new Error('boom'); } },
@@ -81,6 +32,4 @@ export async function runRuntimeClassifierTests() {
   );
   assert.equal(failedClosed.action, 'needs_more_info');
   assert.equal(failedClosed.shouldNotifyProfessor, true);
-
-  delete process.env.OPENAI_API_KEY;
 }

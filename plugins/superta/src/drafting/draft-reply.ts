@@ -13,6 +13,7 @@ export type DraftReplyResult = {
   subjectPrefix: string;
   subject: string;
   body: string;
+  summary: string;
   evidenceSummary: string[];
 };
 
@@ -29,12 +30,12 @@ function buildBody(input: DraftReplyInput) {
   ];
 
   if (input.evidence.length > 0) {
-    lines.push('', 'Grounding evidence:');
+    lines.push('', 'Grounding sources:');
     for (const item of input.evidence) {
-      lines.push(`- [${item.type}] ${item.snippet}`);
+      lines.push(`- [${item.type}] ${item.path}`);
     }
   } else {
-    lines.push('', 'Grounding evidence: none available');
+    lines.push('', 'Grounding sources: none available');
   }
 
   if (input.classification.shouldNotifyProfessor) {
@@ -44,11 +45,21 @@ function buildBody(input: DraftReplyInput) {
   return lines.join('\n');
 }
 
+function buildSummary(input: DraftReplyInput) {
+  return [
+    input.courseId ?? 'unknown-course',
+    input.classification.category,
+    input.classification.action,
+    input.classification.reason,
+  ].join(' | ');
+}
+
 export function draftReply(input: DraftReplyInput): DraftReplyResult {
   return {
     subjectPrefix: /^re\s*:/i.test(input.originalSubject.trim()) ? '' : 'Re:',
     subject: normalizeReplySubject(input.originalSubject),
     body: buildBody(input),
+    summary: buildSummary(input),
     evidenceSummary: summarizeEvidence(input.evidence),
   };
 }

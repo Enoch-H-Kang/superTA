@@ -2,7 +2,12 @@
 
 ## Recommended first-run path
 
-SuperTA’s recommended default path does **not** require any additional model API.
+SuperTA’s supported onboarding story is:
+- OpenClaw plugin
+- Gmail-backed
+- local course files
+- local-model or deterministic-only handling
+- draft/review/manual-send workflow
 
 Run:
 
@@ -14,22 +19,19 @@ node dist/plugins/superta/src/setup/interactive-setup.js
 node dist/plugins/superta/src/setup/doctor-report.js local.config.json . 3600000
 ```
 
-That is the main onboarding story.
-
 ## What this gives you
 
-With the default setup, you get:
+With the supported default setup, you get:
 - an OpenClaw plugin
 - Gmail integration plumbing
 - local course-file grounding
 - deterministic policy controls
-- human review/approval workflow
+- local-model policy boundary
+- human review before outbound communication
+- structured student case tracking
+- redacted operator views by default
 
-without needing OpenAI or another model API.
-
-## After setup
-
-Useful next commands:
+## Useful next commands
 
 ```bash
 node dist/plugins/superta/src/setup/list-courses.js local.config.json
@@ -37,25 +39,19 @@ node dist/plugins/superta/src/setup/doctor-report.js local.config.json . 3600000
 node dist/plugins/superta/src/commands/inspect-state.js . 20
 ```
 
-## Advanced optional mode
+## Privacy note
 
-If you want to experiment with model-backed classification later, see:
-- `docs/responses-classifier.md`
-
-That path is optional and not required for the default plugin story.
-
-## Manual alternatives
-
-For lower-level setup commands and multi-course manual workflows, see:
-- `docs/multi-course-setup.md`
+For real student data:
+- keep the local/institution-controlled deployment posture
+- do not use hosted external APIs for student-data processing
+- use local deterministic logic or local models only
+- keep the draft/review/manual-send workflow
 
 ## Read next
 
 Start with:
+- `docs/privacy-and-deployment.md`
+- `docs/ferpa-safe-defaults.md`
 - `docs/public-demo-walkthrough.md`
-- `docs/demo-script.md`
-- `docs/launch-checklist.md`
-- `docs/announcement-draft.md`
 - `docs/release-readiness.md`
-- `docs/gmail-production-ops.md`
-- `docs/architecture.md`
+- `docs/announcement-draft.md`

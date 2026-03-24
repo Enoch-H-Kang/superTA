@@ -5,18 +5,16 @@ import type { ClassifierProvider } from '../classifier/provider.js';
 import type { NormalizedThread } from '../gmail/normalize.js';
 import { processInboundThreadWithClassifier } from '../orchestration/process-with-classifier.js';
 import { executeProfessorCommand } from '../commands/execute-professor-command.js';
-import { executeApprovedSend } from '../commands/execute-professor-send.js';
 
 export type DeadlineWorkflowResult = {
   queuedReviewItemId?: string;
   approveResult: Awaited<ReturnType<typeof executeProfessorCommand>>;
-  sendResult?: Awaited<ReturnType<typeof executeApprovedSend>>;
 };
 
 export async function runDeadlineEmailWorkflow(
   config: SuperTAConfig,
   store: SuperTAStore,
-  gmailClient: GmailClient,
+  _gmailClient: GmailClient,
   classifier: ClassifierProvider,
   professorSender: string,
   thread: NormalizedThread,
@@ -40,18 +38,8 @@ export async function runDeadlineEmailWorkflow(
     `[SUPERTA APPROVE] ${reviewItemId}`,
   );
 
-  if (approveResult.type !== 'approve' || !approveResult.ok) {
-    return {
-      queuedReviewItemId: reviewItemId,
-      approveResult,
-    };
-  }
-
-  const sendResult = await executeApprovedSend(store, gmailClient, reviewItemId);
-
   return {
     queuedReviewItemId: reviewItemId,
     approveResult,
-    sendResult,
   };
 }

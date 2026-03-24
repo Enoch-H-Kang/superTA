@@ -45,7 +45,10 @@ export function runDraftReplyTests() {
   assert.equal(draft.evidenceSummary.length, 2);
   assert.match(draft.body, /Course: cs101-sp26/);
   assert.match(draft.body, /Category: deadline/);
-  assert.match(draft.body, /late_days: 2/);
+  assert.match(draft.body, /Grounding sources:/);
+  assert.match(draft.body, /courses\/cs101-sp26\/course\/policy.yaml/);
+  assert.match(draft.body, /courses\/cs101-sp26\/course\/faq.md/);
+  assert.ok(draft.summary.length > 0);
 
   const alreadyReply = draftReply({
     courseId: 'cs101-sp26',
@@ -63,5 +66,5 @@ export function runDraftReplyTests() {
     evidence: [],
   });
   assert.match(notifyDraft.body, /Professor notification recommended/);
-  assert.match(notifyDraft.body, /Grounding evidence: none available/);
+  assert.match(notifyDraft.body, /Grounding sources: none available/);
 }

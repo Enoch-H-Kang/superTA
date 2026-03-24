@@ -32,6 +32,18 @@ export async function runLoadConfigTests() {
           courseRoots: {
             'cs101-sp26': '/tmp/cs101',
           },
+          privacy: {
+            ferpaSafeMode: true,
+            allowExternalClassifier: false,
+            allowSend: true,
+            redactOperatorViews: true,
+            storeEvidenceSnippets: false,
+          },
+          localModel: {
+            required: true,
+            provider: 'ollama',
+            endpoint: 'http://127.0.0.1:11434',
+          },
         },
         null,
         2,
@@ -44,6 +56,10 @@ export async function runLoadConfigTests() {
     assert.deepEqual(loadedFull.gmail.allowedProfessorSenders, ['prof@example.edu']);
     assert.equal(loadedFull.routing.courses.length, 1);
     assert.equal(loadedFull.courseRoots['cs101-sp26'], '/tmp/cs101');
+    assert.equal(loadedFull.privacy.allowSend, true);
+    assert.equal(loadedFull.privacy.storeEvidenceSnippets, false);
+    assert.equal(loadedFull.localModel.provider, 'ollama');
+    assert.equal(loadedFull.localModel.endpoint, 'http://127.0.0.1:11434');
 
     const partialPath = join(root, 'config-partial.json');
     await writeFile(partialPath, JSON.stringify({ professorId: 'prof-partial' }, null, 2));
@@ -51,6 +67,10 @@ export async function runLoadConfigTests() {
     assert.equal(loadedPartial.professorId, 'prof-partial');
     assert.equal(loadedPartial.gmail.webhookPath, '/webhooks/gmail');
     assert.ok(Array.isArray(loadedPartial.gmail.allowedProfessorSenders));
+    assert.equal(loadedPartial.privacy.ferpaSafeMode, true);
+    assert.equal(loadedPartial.privacy.allowSend, false);
+    assert.equal(loadedPartial.localModel.required, true);
+    assert.equal(loadedPartial.localModel.provider, 'stub');
   } finally {
     await rm(root, { recursive: true, force: true });
   }

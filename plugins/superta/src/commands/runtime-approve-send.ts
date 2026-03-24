@@ -2,16 +2,12 @@ import { resolve } from 'node:path';
 import { loadConfigFromFile } from '../config/load-config.js';
 import { createFileStore, defaultFileStorePaths } from '../storage/file-store.js';
 import { executeProfessorCommand } from './execute-professor-command.js';
-import { executeApprovedSend } from './execute-professor-send.js';
-import { resolveGmailAuthConfig } from '../gmail/auth-config.js';
-import { createGmailHttpClient } from '../gmail/http-client.js';
 
 export type RuntimeApproveSendOptions = {
   configPath: string;
   stateRoot?: string;
   sender: string;
   reviewItemId: string;
-  mode?: 'approve' | 'approve-and-send';
 };
 
 export async function runRuntimeApproveSend(options: RuntimeApproveSendOptions) {
@@ -34,56 +30,30 @@ export async function runRuntimeApproveSend(options: RuntimeApproveSendOptions) 
     };
   }
 
-  if (options.mode !== 'approve-and-send') {
-    const item = await store.getReviewItem(options.reviewItemId);
-    return {
-      ok: true,
-      step: 'approve' as const,
-      reviewItemId: options.reviewItemId,
-      status: item?.status ?? null,
-      reason: approval.reason,
-    };
-  }
-
-  const gmailClient = createGmailHttpClient(fetch as any, resolveGmailAuthConfig());
-  const sent = await executeApprovedSend(store, gmailClient, options.reviewItemId);
-  if (!sent.ok) {
-    return {
-      ok: false,
-      step: 'send' as const,
-      reviewItemId: options.reviewItemId,
-      reason: sent.reason,
-    };
-  }
-
   const item = await store.getReviewItem(options.reviewItemId);
   return {
     ok: true,
-    step: 'send' as const,
+    step: 'approve' as const,
     reviewItemId: options.reviewItemId,
     status: item?.status ?? null,
-    messageId: sent.messageId,
-    recipients: sent.recipients,
-    reason: sent.reason,
+    reason: `${approval.reason} Runtime send has been removed; send manually from Gmail if desired.`,
   };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === new URL(import.meta.url).pathname) {
   const reviewItemId = process.argv[2];
   const sender = process.argv[3];
-  const mode = (process.argv[4] as 'approve' | 'approve-and-send' | undefined) ?? 'approve-and-send';
-  const configPath = process.argv[5] ?? 'local.config.json';
-  const stateRoot = process.argv[6];
+  const configPath = process.argv[4] ?? 'local.config.json';
+  const stateRoot = process.argv[5];
 
   if (!reviewItemId || !sender) {
-    console.error('Usage: node dist/plugins/superta/src/commands/runtime-approve-send.js <reviewItemId> <sender> [approve|approve-and-send] [configPath] [stateRoot]');
+    console.error('Usage: node dist/plugins/superta/src/commands/runtime-approve-send.js <reviewItemId> <sender> [configPath] [stateRoot]');
     process.exit(1);
   }
 
   runRuntimeApproveSend({
     reviewItemId,
     sender,
-    mode,
     configPath: resolve(process.cwd(), configPath),
     stateRoot: stateRoot ? resolve(process.cwd(), stateRoot) : process.cwd(),
   })

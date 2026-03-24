@@ -13,6 +13,7 @@ export async function processInboundThreadWithConfig(
 ) {
   return processInboundThread(thread, (courseId) => resolveCourseRoot(config, courseId), {
     routeConfig: config.routing,
+    privacy: config.privacy,
     classify: options.classify,
   });
 }
